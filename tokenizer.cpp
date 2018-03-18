@@ -1,8 +1,10 @@
 // #define DEBUG
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <map>
 #include <vector>
+#include <memory>
 #include "tokenizer.hpp"
 
 charGroup processStream::getCurrent() {
@@ -59,8 +61,15 @@ charGroup processStream::getCurrent() {
 	return charGroup::invalid;
 };
 
+
+std::string processStream::flush() {
+	std::string tmp=std::move(buffer_);
+	return tmp;
+};
+
 void processStream::move() {
 	in_>>curr_;
+	buffer_.push_back(curr_);
 	if(in_.eof())
 		eof_=true;
 
@@ -68,3 +77,42 @@ void processStream::move() {
 	std::cout<<in_.eof()<<" "<<curr_<<std::endl;
 #endif
 };
+
+
+void processStream::moveBack() {
+	if(buffer_.size()!=0)
+		buffer_.pop_back();
+
+	if(in_.tellg()>0)
+		in_.unget();
+};
+
+
+int main(int argc, char * * argv) {
+	std::ifstream iff { "tests/testfile.io" };
+	processStream in(iff);
+
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	std::cout<<in.flush()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	std::cout<<in.flush()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+	in.move(); std::cout<<in.getCurrent()<<std::endl;
+
+	std::cout<<in.flush()<<std::endl;
+	return 0;
+}

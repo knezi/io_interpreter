@@ -2,6 +2,7 @@
 #define tokenizer_hpp_
 
 #include <istream>
+#include <string>
 
 #ifdef DEBUG
 #include <iostream>
@@ -32,6 +33,8 @@ class processStream {
 
 		charGroup getCurrent();
 		void move();
+		void moveBack();
+		std::string flush();
 
 	private:
 		std::istream & in_;
@@ -41,6 +44,8 @@ class processStream {
 		std::vector<char> ops_={':', '.', '\'', '~', '!', '@', '$', // missing slash, backslash!!
 			'%', '^', '&', '*', '-', '+', '=', '{', '}',  
 			'[', ']', ',', '<', '>', '?'};
+
+		std::string buffer_;
 };
 
 #endif
