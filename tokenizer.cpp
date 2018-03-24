@@ -97,8 +97,10 @@ void processStream::moveBack() {
 // TOKENIZER
 template<charGroup group, token tok>
 token parseOneChar(processStream& in) {
-	if(in.getCurrent()==group)
+	if(in.getCurrent()==group) {
+		in.move();
 		return tok;
+	}
 	return token::invalidCharacter;
 }
 
@@ -150,14 +152,16 @@ token parseBlockEnd(processStream& in) {
 			group==charGroup::comma ||
 			group==charGroup::close)
 		// don't move here - comma or close will be used by the upper layer
-		return token::eof;
+		return token::endOfArgument;
 
 	return token::invalidCharacter;
 }
 
-void tokenizer::prepareBoxes() {
+void tokenizer::prepare() {
+	if(ready_) return;
+	ready_=true;
+
 	// prepare boxes
-	// WC1
 	boxes_.insert({"WC1", std::make_unique<tokenBox>(in_, parseWC<false>)});
 	
 	boxes_.insert({"BlockEnd",
@@ -172,20 +176,18 @@ void tokenizer::prepareBoxes() {
 			std::make_unique<tokenBox>(in_, parseWC<false>)});
 	boxes_.insert({"Open",
 			std::make_unique<tokenBox>(in_,
-					parseOneChar<charGroup::open, token::skip>)});
-
+					parseOneChar<charGroup::open, token::openArgument>)});
 	boxes_.insert({"NWC1",
 			std::make_unique<tokenBox>(in_, parseWC<true>)});
-	boxes_.insert({"Argument",
-			std::make_unique<tokenBox>(in_, parseSymbol)}); // TODO
+	boxes_.insert({"Argument", std::make_unique<argumentBox>(in_)});
 	boxes_.insert({"NWC2",
 			std::make_unique<tokenBox>(in_, parseWC<true>)});
 	boxes_.insert({"Comma",
 			std::make_unique<tokenBox>(in_,
-					parseOneChar<charGroup::comma, token::skip>)});
+					parseOneChar<charGroup::comma, token::terminator>)}); // TODO skip??
 	boxes_.insert({"Close",
 			std::make_unique<tokenBox>(in_,
-					parseOneChar<charGroup::close, token::skip>)});
+					parseOneChar<charGroup::close, token::closeArgument>)});
 	
 	// transition
 	std::vector<std::pair<std::string, std::string> > transitions={
@@ -199,16 +201,17 @@ void tokenizer::prepareBoxes() {
 											{"WC2", "Open"},
 											{"Open", "NWC1"},
 											{"NWC1", "Argument"},
-											{"Argument", "NWC2"}, // TODO THIS IS WRONG
+											{"Argument", "NWC2"},
 											{"NWC2", "Close"},
 											{"Close", "WC1"},
 	
 											{"NWC2", "Comma"},
-											{"WC2", "WC1"}}; // this have lower priority DIRTY TRICK WARNING TODO
+											{"Comma", "NWC1"},
+											{"WC2", "WC1"}}; // this has lower priority DIRTY TRICK WARNING TODO
 
 
 	for(auto && tr: transitions) {
-		tokenBox* to=boxes_.find(tr.second)
+		box* to=boxes_.find(tr.second)
 								->second.get();
 		boxes_.find(tr.first)
 			->second
@@ -219,7 +222,7 @@ void tokenizer::prepareBoxes() {
 }
 
 token tokenizer::nextToken() {
-	tokenBox* newCurr=curr_->getNextBox();
+	box* newCurr=curr_->getNextBox();
 	token currToken=newCurr->parseToken(); // TODO KDYŽ DOJDOU BOXY
 	while(currToken==token::invalidCharacter) {
 		newCurr=curr_->getNextBox();
@@ -236,15 +239,20 @@ int main(int argc, char * * argv) {
 	processStream in(iff); 
 
 	tokenizer run(in);
+	run.prepare();
 
-	std::cout<<(int)run.nextToken()<<' '<<in.flush()<<std::endl;
+	// std::cout<<(int)run.nextToken()<<' '<<in.flush()<<std::endl;
 
 	token currToken;
 	do {
 		currToken=run.nextToken();
-		if(currToken==token::skip) continue;
+		if(currToken==token::skip) {
+			in.flush();
+			continue;
+		}
 
 		std::cout<<(int)currToken<<' '<<in.flush()<<std::endl;
-	} while(currToken!=token::eof);
+	} while(currToken!=token::endOfArgument);
+
 	return 0;
 }
