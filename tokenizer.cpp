@@ -45,6 +45,12 @@ charGroup processStream::getCurrent() const {
 
 		case ')':
 			return charGroup::close;
+
+		case '#':
+			return charGroup::hash;
+
+		case '*':
+			return charGroup::star;
 	}
 
 
@@ -85,6 +91,7 @@ void processStream::move() {
 };
 
 
+// needed for comments
 void processStream::moveBack() {
 	if(buffer_.size()!=0)
 		buffer_.pop_back();
@@ -121,14 +128,55 @@ token parseSymbol(processStream& in) {
 	return token::symbol;
 }
 
+// leaves current at the last character of the comment (\n or slash)
+token parseComment(processStream& in) {
+	charGroup group=in.getCurrent();
+	bool inlineComment=false;
+
+	if(group==charGroup::slash) {
+		in.move();
+		group=in.getCurrent();
+		// multiline comment
+		if(group==charGroup::star) {
+			while(true) {
+				in.move();
+				if(in.getCurrent()==charGroup::star) {
+					in.move();
+					if(in.getCurrent()==charGroup::slash)
+						return token::skip;
+					// because of **/
+					in.moveBack();
+				}
+			}
+		}
+		else if(group==charGroup::slash)
+			inlineComment=true;
+		else {
+			in.moveBack();
+			return token::invalidCharacter;
+		}
+	}
+
+	if(group==charGroup::hash || inlineComment) {
+		while(group!=charGroup::newline &&
+				group!=charGroup::eof) {
+			in.move();
+			group=in.getCurrent();
+		}
+		return token::skip;
+	}
+
+	return token::invalidCharacter;
+}
+
 // Whitespace (' ', \f, \t, \v), [Newline (\r, \n)] + comments
 // satisfies empty string
-// TODO comments
 template<bool newLines>
 token parseWC(processStream& in) {
 	charGroup group=in.getCurrent();
 	while(group==charGroup::whitespace ||
-			(newLines && group==charGroup::newline)) {
+			(newLines && group==charGroup::newline) ||
+			parseComment(in)==token::skip) {
 		in.move();
 		group=in.getCurrent();
 	}

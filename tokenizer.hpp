@@ -28,6 +28,8 @@ enum class charGroup {
 	open,
 	close,
 	eof,
+	hash,
+	star,
 	invalid
 };
 
@@ -56,7 +58,7 @@ class processStream {
 		bool eof_=false;
 
 		std::vector<char> ops_={':', '.', '\'', '~', '!', '@', '$', // missing slash, backslash!!
-			'%', '^', '&', '*', '-', '+', '=', '{', '}',  
+			'%', '^', '&', '-', '+', '=', '{', '}',  
 			'[', ']', ',', '<', '>', '?'};
 
 		std::string buffer_;
