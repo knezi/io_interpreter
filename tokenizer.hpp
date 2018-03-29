@@ -71,10 +71,11 @@ enum class token {
 	skip, 				// 1
 	argument,			// 2
 	terminator,			// 3
-	endOfArgument,		// 4
-	openArgument,		// 5
-	closeArgument,		// 6
-	invalidCharacter	// 7
+	nextArgument,		// 4
+	endOfBlock,			// 5
+	openArguments,		// 6
+	closeArguments,		// 7
+	invalidCharacter	// 8
 };
 
 using parseTokenSignature = token (*) (processStream &);
@@ -166,32 +167,8 @@ class argumentBox: public box {
 			box(in),
 			argument_(in) {};
 
-		virtual box* getNextBox() { // TODO move code to base class
-			// if(indexNextBox // TODO check boundaries
-			if(endOfArgument_) {
-				argument_.reset(); // prepare for the next argument
-				return nextBoxes_[indexNextBox_++];
-			}
-
-			return this;
-		};
-
-		virtual token parseToken() { // TODO move code to BASE class
-			if(!argument_.ready())
-				argument_.prepare();
-
-			indexNextBox_=0; // offer nextBoxes from start again
-			endOfArgument_=false;
-			token nextToken=argument_.nextToken();
-
-			if(nextToken==token::endOfArgument) {
-				endOfArgument_=true;
-				// EndOfArgument is for this layer to know it should continue
-				return token::skip;
-			}
-
-			return nextToken;
-		};
+		virtual box* getNextBox();
+		virtual token parseToken();
 
 	private:
 		bool endOfArgument_=false;

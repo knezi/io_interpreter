@@ -82,7 +82,10 @@ void processStream::move() {
 	// in this order, so curr_ is never in the buffer
 	buffer_.push_back(curr_);
 	in_>>curr_;
-	if(in_.eof()) // TODO EOF _ is the last character added? No chance
+
+	// this is true when there are no more chars
+	// -> previous op returns nonsense
+	if(in_.eof())
 		eof_=true;
 
 #ifdef DEBUG
@@ -102,6 +105,10 @@ void processStream::moveBack() {
 
 
 // TOKENIZER
+token parseDummy(processStream& in) {
+	return token::invalidCharacter;
+}
+
 template<charGroup group, token tok>
 token parseOneChar(processStream& in) {
 	if(in.getCurrent()==group) {
@@ -200,7 +207,7 @@ token parseBlockEnd(processStream& in) {
 			group==charGroup::comma ||
 			group==charGroup::close)
 		// don't move here - comma or close will be used by the upper layer
-		return token::endOfArgument;
+		return token::endOfBlock;
 
 	return token::invalidCharacter;
 }
@@ -210,6 +217,7 @@ void tokenizer::prepare() {
 	ready_=true;
 
 	// prepare boxes
+	boxes_.insert({"Dummy", std::make_unique<tokenBox>(in_, parseDummy)});
 	boxes_.insert({"WC1", std::make_unique<tokenBox>(in_, parseWC<false>)});
 	
 	boxes_.insert({"BlockEnd",
@@ -224,7 +232,7 @@ void tokenizer::prepare() {
 			std::make_unique<tokenBox>(in_, parseWC<false>)});
 	boxes_.insert({"Open",
 			std::make_unique<tokenBox>(in_,
-					parseOneChar<charGroup::open, token::openArgument>)});
+					parseOneChar<charGroup::open, token::openArguments>)});
 	boxes_.insert({"NWC1",
 			std::make_unique<tokenBox>(in_, parseWC<true>)});
 	boxes_.insert({"Argument", std::make_unique<argumentBox>(in_)});
@@ -232,13 +240,14 @@ void tokenizer::prepare() {
 			std::make_unique<tokenBox>(in_, parseWC<true>)});
 	boxes_.insert({"Comma",
 			std::make_unique<tokenBox>(in_,
-					parseOneChar<charGroup::comma, token::terminator>)}); // TODO skip??
+					parseOneChar<charGroup::comma, token::nextArgument>)});
 	boxes_.insert({"Close",
 			std::make_unique<tokenBox>(in_,
-					parseOneChar<charGroup::close, token::closeArgument>)});
+					parseOneChar<charGroup::close, token::closeArguments>)});
 	
 	// transition
 	std::vector<std::pair<std::string, std::string> > transitions={
+											{"Dummy", "WC1"}, 
 											{"WC1", "Terminator"}, 
 											{"Terminator", "WC1"}, 
 
@@ -266,7 +275,7 @@ void tokenizer::prepare() {
 			->addNextBox(to);
 	}
 
-	curr_=boxes_.find("WC1")->second.get();
+	curr_=boxes_.find("Dummy")->second.get();
 }
 
 token tokenizer::nextToken() {
@@ -282,9 +291,39 @@ token tokenizer::nextToken() {
 	return currToken;
 }
 
+
+box* argumentBox::getNextBox() { // TODO move code to base class
+	// if(indexNextBox // TODO check boundaries
+	if(endOfArgument_) {
+		argument_.reset(); // prepare for the next argument
+		return nextBoxes_[indexNextBox_++];
+	}
+
+	return this;
+};
+
+token argumentBox::parseToken() { // TODO move code to BASE class
+	if(!argument_.ready())
+		argument_.prepare();
+
+	indexNextBox_=0; // offer nextBoxes from start again
+	endOfArgument_=false;
+	token nextToken=argument_.nextToken();
+
+	if(nextToken==token::endOfBlock) {
+		endOfArgument_=true;
+		// EndOfArgument is for this layer to know it should continue
+		return token::skip;
+	}
+
+	return nextToken;
+};
+
+
 int main(int argc, char * * argv) {
-	std::ifstream iff { "tests/testfile.io" };
+	std::ifstream iff { "tests/testfile_correct.io" };
 	processStream in(iff); 
+
 
 	tokenizer run(in);
 	run.prepare();
@@ -300,7 +339,7 @@ int main(int argc, char * * argv) {
 		}
 
 		std::cout<<(int)currToken<<' '<<in.flush()<<std::endl;
-	} while(currToken!=token::endOfArgument);
+	} while(currToken!=token::endOfBlock);
 
 	return 0;
 }
