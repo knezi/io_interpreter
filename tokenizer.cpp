@@ -275,15 +275,22 @@ void tokenizer::prepare() {
 			->addNextBox(to);
 	}
 
-	curr_=boxes_.find("Dummy")->second.get();
+	auto dummyBox=boxes_.find("Dummy")->second.get();
+
+	for(auto && box: boxes_) {
+		box.second->addNextBox(dummyBox);
+	}
+
+	curr_=dummyBox;
 }
 
 token tokenizer::nextToken() {
 	box* newCurr=curr_->getNextBox();
-	token currToken=newCurr->parseToken(); // TODO KDYŽ DOJDOU BOXY
+	token currToken=newCurr->parseToken();
 	while(currToken==token::invalidCharacter) {
 		newCurr=curr_->getNextBox();
 		currToken=newCurr->parseToken();
+		std::cout<<(int)currToken<<std::endl;
 	}
 
 	curr_=newCurr;
@@ -291,12 +298,17 @@ token tokenizer::nextToken() {
 	return currToken;
 }
 
+box* box::getNextBox() {
+	if(indexNextBox_>nextBoxes_.size()-1)
+		indexNextBox_=nextBoxes_.size()-1;
 
-box* argumentBox::getNextBox() { // TODO move code to base class
-	// if(indexNextBox // TODO check boundaries
+	return nextBoxes_[indexNextBox_++];
+};
+
+box* argumentBox::getNextBox() {
 	if(endOfArgument_) {
 		argument_.reset(); // prepare for the next argument
-		return nextBoxes_[indexNextBox_++];
+		return box::getNextBox();
 	}
 
 	return this;
@@ -321,7 +333,8 @@ token argumentBox::parseToken() { // TODO move code to BASE class
 
 
 int main(int argc, char * * argv) {
-	std::ifstream iff { "tests/testfile_correct.io" };
+	// std::ifstream iff { "tests/testfile_correct.io" };
+	std::ifstream iff { "tests/testfile.io" };
 	processStream in(iff); 
 
 
@@ -340,6 +353,8 @@ int main(int argc, char * * argv) {
 
 		std::cout<<(int)currToken<<' '<<in.flush()<<std::endl;
 	} while(currToken!=token::endOfBlock);
+	if(!in.eof())
+		std::cout<<"DOSTANES PESTI";
 
 	return 0;
 }

@@ -90,7 +90,8 @@ class box {
 			nextBoxes_.push_back(box);
 		};
 
-		virtual box* getNextBox() = 0;
+		virtual box* getNextBox();
+
 		virtual token parseToken() = 0;
 
 	protected:
@@ -106,8 +107,7 @@ class tokenBox: public box {
 			parseToken_(parseTokenFunc) {};
 
 		virtual box* getNextBox() {
-			// if(indexNextBox // TODO check boundaries
-			return nextBoxes_[indexNextBox_++];
+			return box::getNextBox();
 		};
 
 		virtual token parseToken() {
@@ -159,8 +159,6 @@ class tokenizer {
 };
 
 
-// TODO change order??
-// TODO EVERYWHERE inline functions, move code to CPP
 class argumentBox: public box {
 	public:
 		argumentBox(processStream& in):
