@@ -290,7 +290,6 @@ token tokenizer::nextToken() {
 	while(currToken==token::invalidCharacter) {
 		newCurr=curr_->getNextBox();
 		currToken=newCurr->parseToken();
-		std::cout<<(int)currToken<<std::endl;
 	}
 
 	curr_=newCurr;
@@ -330,31 +329,3 @@ token argumentBox::parseToken() { // TODO move code to BASE class
 
 	return nextToken;
 };
-
-
-int main(int argc, char * * argv) {
-	// std::ifstream iff { "tests/testfile_correct.io" };
-	std::ifstream iff { "tests/testfile.io" };
-	processStream in(iff); 
-
-
-	tokenizer run(in);
-	run.prepare();
-
-	// std::cout<<(int)run.nextToken()<<' '<<in.flush()<<std::endl;
-
-	token currToken;
-	do {
-		currToken=run.nextToken();
-		if(currToken==token::skip) {
-			in.flush();
-			continue;
-		}
-
-		std::cout<<(int)currToken<<' '<<in.flush()<<std::endl;
-	} while(currToken!=token::endOfBlock);
-	if(!in.eof())
-		std::cout<<"DOSTANES PESTI";
-
-	return 0;
-}
