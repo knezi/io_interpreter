@@ -1,2 +1,2 @@
-1 print print
-2 print
+2 print print ++ print
+1 ++ print ++ print

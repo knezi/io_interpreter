@@ -142,6 +142,15 @@ class tokenizer {
 		void prepare();
 
 		token nextToken();
+		token futureToken();
+
+		std::string flush() {
+			return in_.flush();
+		}
+
+		bool eof() {
+			return in_.eof();
+		}
 
 		void reset() {
 			curr_=boxes_.find("WC1")->second.get();

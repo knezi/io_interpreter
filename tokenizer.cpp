@@ -74,8 +74,7 @@ charGroup processStream::getCurrent() const {
 
 
 std::string processStream::flush() {
-	std::string tmp=std::move(buffer_);
-	return tmp;
+	return std::move(buffer_);
 };
 
 void processStream::move() {
@@ -285,14 +284,40 @@ void tokenizer::prepare() {
 }
 
 token tokenizer::nextToken() {
-	box* newCurr=curr_->getNextBox();
-	token currToken=newCurr->parseToken();
-	while(currToken==token::invalidCharacter) {
-		newCurr=curr_->getNextBox();
-		currToken=newCurr->parseToken();
-	}
+	token currToken;
 
-	curr_=newCurr;
+	// automatically skips tokens skip
+	do {
+		in_.flush();
+		box* newCurr=curr_->getNextBox();
+		currToken=newCurr->parseToken();
+		while(currToken==token::invalidCharacter) {
+			newCurr=curr_->getNextBox();
+			currToken=newCurr->parseToken();
+		}
+
+		curr_=newCurr;
+	} while(currToken==token::skip);
+
+	return currToken;
+}
+
+token tokenizer::futureToken() {
+	token currToken;
+	box* curTmp=curr_;
+
+	// automatically skips tokens skip
+	do {
+		box* newCurr=curTmp->getNextBox();
+		currToken=newCurr->parseToken();
+		while(currToken==token::invalidCharacter) {
+			newCurr=curTmp->getNextBox();
+			currToken=newCurr->parseToken();
+		}
+
+		curTmp=newCurr;
+		std::cout<<(int)currToken<<std::endl;
+	} while(currToken==token::skip);
 
 	return currToken;
 }
