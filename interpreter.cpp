@@ -14,7 +14,7 @@ int main(int argc, char * * argv) {
 	std::ifstream iff { "tests/testfile.io" };
 	processStream in(iff);
 	tokenizer tok(in);
-	Interpreter run(tok);
+	Interpreter run(tok, token::endOfBlock);
 	
 	return 0;
 }

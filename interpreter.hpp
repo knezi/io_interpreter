@@ -4,7 +4,8 @@
 
 class Interpreter {
 	public:
-		Interpreter(tokenizer& tok_): tok(tok_) {
+		Interpreter(tokenizer& tok_, token last_token_):
+			tok(tok_), last_token{last_token_} {
 			curr_scope=&main;
 			tok.prepare(); // ????? TODO
 
@@ -34,16 +35,22 @@ class Interpreter {
 					default:
 						std::cerr<<"Unknown token."<<(int)currToken<<std::endl;
 				}
-			} while(currToken!=token::endOfBlock);
+			} while(currToken!=last_token);
 
 			if(!tok.eof())
 				std::cerr<<"File hasn't been properly ended."<<std::endl;
+		}
+
+
+		Object* lastScope() {
+			return curr_scope;
 		}
 
 	private:
 		tokenizer& tok;
 		Object* curr_scope;
 		Object main;
+		token last_token;
 
 		void processSymbol() {
 			std::string s=tok.flush();
@@ -60,13 +67,29 @@ class Interpreter {
 			// std::cout<<"Calling print"<<std::endl;
 
 			if(no) {
+				// TODO TMP
 				curr_scope->addIntoSlot(s, std::make_unique<Number>(stoi(s)));
 				curr_scope=curr_scope->getSlot(s);
 				return;
 			}
 			
-			
-			curr_scope=curr_scope->getSlot(s);
+			Object* next_slot=curr_scope->getSlot(s);
+
+			// the following must be := or die
+			if(next_slot==nullptr) {
+				token nextTok=tok.nextToken();
+				std::string op=tok.flush();
+
+				if(nextTok==token::symbol && op==":=") {
+					Interpreter expr(tok, token::terminator);
+					// TODO prasarna
+					curr_scope->addIntoSlot(s, std::make_unique<Object>(expr.lastScope()));
+					curr_scope=&main;
+				}else{
+					// TODO throw exception
+				}
+			}else
+			curr_scope=next_slot;
 		}
 
 };

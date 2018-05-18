@@ -20,8 +20,10 @@ class Object {
 		Object& operator=(const Object& f) = default;
 
 		Object* getSlot(const std::string& ObjectName) {
-			// TODO create a NULL Object
-			return (Objects.find(ObjectName)->second).get();
+			auto slot=Objects.find(ObjectName);
+			if(slot==Objects.end())
+				return nullptr;
+			return slot->second.get();
 		}
 
 		template<typename str>
@@ -91,6 +93,7 @@ class Print: public Function {
 			//TODO
 			std::cout<<"PRINTING VALUE ";
 			std::cout<<((t&)scope).value;
+			std::cout<<std::endl;
 			return &scope;
 		}
 
