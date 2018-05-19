@@ -9,6 +9,8 @@ class Function;
 class Object;
 class Arguments;
 
+typedef std::shared_ptr<Object> obj_ptr;
+
 class Object {
 	public:
 		Object(): callable{false} {}
@@ -19,23 +21,24 @@ class Object {
 		Object& operator=(Object&& f) = default;
 		Object& operator=(const Object& f) = default;
 
-		Object* getSlot(const std::string& ObjectName) {
+		obj_ptr getSlot(const std::string& ObjectName) {
 			auto slot=Objects.find(ObjectName);
 			if(slot==Objects.end())
 				return nullptr;
-			return slot->second.get();
+			return slot->second;
 		}
 
 		template<typename str>
-		void addIntoSlot(str&& ObjectName, std::unique_ptr<Object> obj) {
+		void addIntoSlot(str&& ObjectName, obj_ptr obj) {
 			Objects.insert({std::forward<str>(ObjectName),
 					std::move(obj)});
 		}
 
 
-		virtual Object* operator()(Arguments& args) {
+		virtual obj_ptr operator()(obj_ptr function_scope, Arguments& args) {
 			std::cerr<<"Not callable"<<std::endl;
-			return this;
+			// TODO RETURN
+			return std::shared_ptr<Object>(this);
 		}
 
 		const bool callable;
@@ -58,7 +61,7 @@ class Object {
 		// }
 
 	private:
-		std::map<std::string, std::unique_ptr<Object>> Objects;
+		std::map<std::string, obj_ptr> Objects;
 		// Object tmp_copy;
 		// bool tmp_copy_valid;
 
@@ -67,34 +70,30 @@ class Object {
 
 class Function: public Object {
 	public:
-		Function(Object& scope_) : scope{scope_}, Object{true} {}
+		Function(): Object{true} {}
 
 		Function(Function&& f) = default;
 		Function(const Function& f) = default;
 		Function& operator=(Function&& f) = default;
 		Function& operator=(const Function& f) = default;
 
-		virtual Object* operator()(Arguments& args) override {
+		virtual obj_ptr operator()(obj_ptr function_scope, Arguments& args) override {
 			std::cout<<"FUNCTION"<<callable;
-			return this;
+			return function_scope;
 		}
-
-	protected:
-		Object& scope;
 
 };
 
 template<typename t>
 class Print: public Function {
 	public:
-		Print(Object& scope): Function(scope) {}
 
-		virtual Object* operator()(Arguments& args) override {
+		virtual obj_ptr operator()(obj_ptr function_scope, Arguments& args) override {
 			//TODO
 			std::cout<<"PRINTING VALUE ";
-			std::cout<<((t&)scope).value;
+			std::cout<<((t*)function_scope.get())->value;
 			std::cout<<std::endl;
-			return &scope;
+			return function_scope;
 		}
 
 };
@@ -103,10 +102,10 @@ class Print: public Function {
 template<typename t>
 class Increment: public Function {
 	public:
-		Increment(Object& scope): Function(scope) {}
-		virtual Object* operator()(Arguments& args) override {
-			++((t&)scope).value;
-			return &scope;
+		virtual obj_ptr operator()(obj_ptr function_scope, Arguments& args) override {
+			// TODO pretypovani
+			++((t*)function_scope.get())->value;
+			return function_scope;
 		}
 
 };
@@ -115,7 +114,7 @@ template<typename t>
 class PrimitiveType: public Object {
 	public:
 		PrimitiveType(): value{} { addBuiltIns(); }; 
-		PrimitiveType(t&& v): value{std::move(v)} { addBuiltIns(); }; 
+		PrimitiveType(t&& v): value{v} { addBuiltIns(); }; 
 		PrimitiveType(const t& v): value{v} { addBuiltIns(); }; 
 
 		PrimitiveType(PrimitiveType&& f) = default;
@@ -125,10 +124,9 @@ class PrimitiveType: public Object {
 
 		t value;
 
-	private:
 		void addBuiltIns() {
-			addIntoSlot("print", std::make_unique<Print<PrimitiveType<t>>>(*this));
-			addIntoSlot("++", std::make_unique<Increment<PrimitiveType<t>>>(*this));
+			addIntoSlot("print", std::make_shared<Print<PrimitiveType<t>>>());
+			addIntoSlot("++", std::make_shared<Increment<PrimitiveType<t>>>());
 		}
 };
 

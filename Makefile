@@ -12,6 +12,8 @@ $(ODIR)/%.o: %.cpp %.hpp
 all: $(OBJ)
 	g++ -o interpreter $^ $(CFLAGS)
 
+Debug: all
+
 .PHONY: clean
 
 clean:

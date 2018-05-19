@@ -1,24 +1,31 @@
 #ifndef interpreter_hpp_
 #define interpreter_hpp_
 #include <fstream>
+#include <exception>
 
 class Interpreter {
 	public:
-		Interpreter(tokenizer& tok_, token last_token_):
-			tok(tok_), last_token{last_token_} {
-			curr_scope=&main;
-			tok.prepare(); // ????? TODO
+		Interpreter(tokenizer& tok_, bool terminator_):
+			Interpreter(tok_, terminator_, std::make_shared<Object>()) {};
+
+		Interpreter(tokenizer& tok_, bool terminator_, obj_ptr main_):
+			tok{tok_}, endAtTerminator{terminator_}, main{main_}{
+			// TODO
+			curr_scope=main;
+			tok.prepare();
 
 			token currToken;
 			do {
 				currToken=tok.nextToken();
+				terminator=false;
 				if(curr_scope->callable) {
 					Arguments args;
 					if(currToken==token::openArguments) {
 						args=Arguments(tok);
 					}
 
-					curr_scope=(*curr_scope)(args);
+					// std::cout<<"CALL METHOD"<<std::endl;
+					curr_scope=(*curr_scope)(function_scope, args);
 				}
 
 				std::cout<<"PROCESSING "<<(int)currToken<<std::endl;
@@ -29,28 +36,33 @@ class Interpreter {
 						break;
 
 					case token::terminator:
-						curr_scope=&main;
+						resetScope();
 						break;
 						
 					default:
 						std::cerr<<"Unknown token."<<(int)currToken<<std::endl;
 				}
-			} while(currToken!=last_token);
+			} while(!tok.eof() && currToken!=token::endOfBlock &&
+					!(endAtTerminator && terminator));
 
-			if(!tok.eof())
-				std::cerr<<"File hasn't been properly ended."<<std::endl;
+			// TODO
+			// if(!tok.eof())
+				// std::cerr<<"File hasn't been properly ended."<<std::endl;
 		}
 
 
-		Object* lastScope() {
-			return curr_scope;
+		std::shared_ptr<Object> lastScope() {
+			return old_scope;
 		}
 
 	private:
 		tokenizer& tok;
-		Object* curr_scope;
-		Object main;
-		token last_token;
+		obj_ptr curr_scope;
+		obj_ptr function_scope;
+		obj_ptr main;
+		obj_ptr old_scope;
+		bool endAtTerminator;
+		bool terminator;
 
 		void processSymbol() {
 			std::string s=tok.flush();
@@ -68,12 +80,13 @@ class Interpreter {
 
 			if(no) {
 				// TODO TMP
-				curr_scope->addIntoSlot(s, std::make_unique<Number>(stoi(s)));
+				std::shared_ptr<Number> new_no=std::make_shared<Number>(stoi(s));
+				curr_scope->addIntoSlot(s, new_no);
 				curr_scope=curr_scope->getSlot(s);
 				return;
 			}
 			
-			Object* next_slot=curr_scope->getSlot(s);
+			obj_ptr next_slot=curr_scope->getSlot(s);
 
 			// the following must be := or die
 			if(next_slot==nullptr) {
@@ -81,16 +94,29 @@ class Interpreter {
 				std::string op=tok.flush();
 
 				if(nextTok==token::symbol && op==":=") {
-					Interpreter expr(tok, token::terminator);
+					std::cout<<">>"<<std::endl;
+					Interpreter expr(tok, true, curr_scope);
+					std::cout<<"<<"<<std::endl;
 					// TODO prasarna
-					curr_scope->addIntoSlot(s, std::make_unique<Object>(expr.lastScope()));
-					curr_scope=&main;
+					std::cout<<"ADDING "<<s<<std::endl;
+					curr_scope->addIntoSlot(s, expr.lastScope());
+					resetScope();
 				}else{
 					// TODO throw exception
+					throw std::exception();
 				}
-			}else
-			curr_scope=next_slot;
+			}else{
+				if(next_slot->callable)
+					function_scope=curr_scope;
+				curr_scope=next_slot;
+			}
 		}
 
+		void resetScope() {
+			std::cout<<"RESETING"<<std::endl;
+			old_scope=curr_scope;
+			curr_scope=main;
+			terminator=true;
+		}
 };
 #endif

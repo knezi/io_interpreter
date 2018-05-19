@@ -299,28 +299,10 @@ token tokenizer::nextToken() {
 		curr_=newCurr;
 	} while(currToken==token::skip);
 
+	// std::cout<<"TOKEN "<<(int)currToken<<std::endl;
 	return currToken;
 }
 
-token tokenizer::futureToken() {
-	token currToken;
-	box* curTmp=curr_;
-
-	// automatically skips tokens skip
-	do {
-		box* newCurr=curTmp->getNextBox();
-		currToken=newCurr->parseToken();
-		while(currToken==token::invalidCharacter) {
-			newCurr=curTmp->getNextBox();
-			currToken=newCurr->parseToken();
-		}
-
-		curTmp=newCurr;
-		std::cout<<(int)currToken<<std::endl;
-	} while(currToken==token::skip);
-
-	return currToken;
-}
 
 box* box::getNextBox() {
 	if(indexNextBox_>nextBoxes_.size()-1)

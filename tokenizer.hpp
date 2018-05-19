@@ -142,7 +142,6 @@ class tokenizer {
 		void prepare();
 
 		token nextToken();
-		token futureToken();
 
 		std::string flush() {
 			return in_.flush();
