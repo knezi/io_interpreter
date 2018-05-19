@@ -28,7 +28,7 @@ class Interpreter {
 					curr_scope=(*curr_scope)(function_scope, args);
 				}
 
-				std::cout<<"PROCESSING "<<(int)currToken<<std::endl;
+				// std::cout<<"PROCESSING "<<(int)currToken<<std::endl;
 
 				switch(currToken) {
 					case token::symbol:
@@ -98,7 +98,7 @@ class Interpreter {
 					Interpreter expr(tok, true, curr_scope);
 					std::cout<<"<<"<<std::endl;
 					// TODO prasarna
-					std::cout<<"ADDING "<<s<<std::endl;
+					// std::cout<<"ADDING "<<s<<std::endl;
 					curr_scope->addIntoSlot(s, expr.lastScope());
 					resetScope();
 				}else{
@@ -113,7 +113,7 @@ class Interpreter {
 		}
 
 		void resetScope() {
-			std::cout<<"RESETING"<<std::endl;
+			// std::cout<<"RESETING"<<std::endl;
 			old_scope=curr_scope;
 			curr_scope=main;
 			terminator=true;

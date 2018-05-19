@@ -11,6 +11,8 @@ class Arguments;
 
 typedef std::shared_ptr<Object> obj_ptr;
 
+#include "builtinfunctions.hpp"
+
 class Object {
 	public:
 		Object(): callable{false} {}
@@ -70,7 +72,7 @@ class Object {
 
 class Function: public Object {
 	public:
-		Function(): Object{true} {}
+		Function(obj_ptr (*f_)(obj_ptr, Arguments&)): f{f_}, Object{true} {}
 
 		Function(Function&& f) = default;
 		Function(const Function& f) = default;
@@ -78,37 +80,13 @@ class Function: public Object {
 		Function& operator=(const Function& f) = default;
 
 		virtual obj_ptr operator()(obj_ptr function_scope, Arguments& args) override {
-			std::cout<<"FUNCTION"<<callable;
-			return function_scope;
+			return f(function_scope, args);
 		}
 
+	private:
+		obj_ptr (*f)(obj_ptr, Arguments&);
 };
 
-template<typename t>
-class Print: public Function {
-	public:
-
-		virtual obj_ptr operator()(obj_ptr function_scope, Arguments& args) override {
-			//TODO
-			std::cout<<"PRINTING VALUE ";
-			std::cout<<((t*)function_scope.get())->value;
-			std::cout<<std::endl;
-			return function_scope;
-		}
-
-};
-
-// TODO tohle predelej do standardni metody pres konstruktor funtion
-template<typename t>
-class Increment: public Function {
-	public:
-		virtual obj_ptr operator()(obj_ptr function_scope, Arguments& args) override {
-			// TODO pretypovani
-			++((t*)function_scope.get())->value;
-			return function_scope;
-		}
-
-};
 
 template<typename t>
 class PrimitiveType: public Object {
@@ -125,8 +103,8 @@ class PrimitiveType: public Object {
 		t value;
 
 		void addBuiltIns() {
-			addIntoSlot("print", std::make_shared<Print<PrimitiveType<t>>>());
-			addIntoSlot("++", std::make_shared<Increment<PrimitiveType<t>>>());
+			addIntoSlot("print", std::make_shared<Function>(builtins::print<PrimitiveType<t>>));
+			addIntoSlot("++", std::make_shared<Function>(builtins::increment<PrimitiveType<t>>));
 		}
 };
 
