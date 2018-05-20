@@ -3,7 +3,7 @@ CFLAGS=-g --std=c++17
 
 ODIR=obj
 
-_OBJ = tokenizer.o interpreter.o scope.o builtinfunctions.o
+_OBJ = tokenizer.o scope.o builtinfunctions.o interpreter.o 
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.cpp %.hpp

@@ -336,3 +336,31 @@ token argumentBox::parseToken() { // TODO move code to BASE class
 
 	return nextToken;
 };
+
+
+// TOKENIZERBUILDER CLASS DEFINITION
+token tokenizerBuilder::nextToken() {
+	currString=tokens.front().second;
+	token currToken=tokens.front().first;
+	tokens.pop();
+	return currToken;
+}
+
+std::string tokenizerBuilder::flush() {
+	return currString;
+}
+
+bool tokenizerBuilder::eof() {
+	return tokens.empty();
+}
+
+void tokenizerBuilder::addTokens(token tok, std::string str) {
+	tokens.emplace(tok, str);
+}
+
+void tokenizerBuilder::addTokens(tokenque q) {
+	while(!q.empty()) {
+		tokens.push(q.front());
+		q.pop();
+	}
+}

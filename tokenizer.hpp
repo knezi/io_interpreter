@@ -187,35 +187,19 @@ class tokenizerBuilder: public tokenizerBase {
 		virtual ~tokenizerBuilder() = default;
 		virtual void prepare() override {}; // just to override base
 
-		virtual token nextToken() override {
-			currString=tokens.front().second;
-			token currToken=tokens.front().first;
-			tokens.pop();
-			return currToken;
-		}
+		virtual token nextToken() override;
 
-		virtual std::string flush() override {
-			return currString;
-		}
+		virtual std::string flush() override;
 
-		virtual bool eof() override {
-			return tokens.empty();
-		}
+		virtual bool eof() override;
 
 		virtual void reset() override {}; // in builder reset is trigged automatically
 
 		virtual bool ready() override { return true;} // no need for preparation
 
-		void addTokens(token tok, std::string str) {
-			tokens.push({tok, str});
-		}
+		void addTokens(token tok, std::string str);
 
-		void addTokens(tokenque q) {
-			while(!q.empty()) {
-				tokens.push(q.front());
-				q.pop();
-			}
-		}
+		void addTokens(tokenque q);
 
 	private:
 		tokenque tokens;
