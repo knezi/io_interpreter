@@ -153,23 +153,23 @@ class tokenizer: public tokenizerBase {
 
 		// this cannnot be called from the constructor to avoid indefinite
 		// recursion tokenizer -> argumentBox -> tokenizer
-		virtual void prepare() override;
+		void prepare() override;
 
-		virtual token nextToken() override;
+		token nextToken() override;
 
-		virtual std::string flush() override {
+		std::string flush() override {
 			return in_.flush();
 		}
 
-		virtual bool eof() override {
+		bool eof() override {
 			return in_.eof();
 		}
 
-		virtual void reset() override {
+		void reset() override {
 			curr_=boxes_.find("WC1")->second.get();
 		};
 
-		virtual bool ready() override {
+		bool ready() override {
 			return ready_;
 		}
 
@@ -180,22 +180,21 @@ class tokenizer: public tokenizerBase {
 		bool ready_=false;
 };
 
-typedef std::queue<std::pair<token, std::string>> tokenque;
+using tokenque=std::queue<std::pair<token, std::string>>;
 class tokenizerBuilder: public tokenizerBase {
 	public:
-		tokenizerBuilder(): tokens{} {};
-		virtual ~tokenizerBuilder() = default;
-		virtual void prepare() override {}; // just to override base
+		~tokenizerBuilder() override = default;
+		void prepare() override {}; // just to override base
 
-		virtual token nextToken() override;
+		token nextToken() override;
 
-		virtual std::string flush() override;
+		std::string flush() override;
 
-		virtual bool eof() override;
+		bool eof() override;
 
-		virtual void reset() override {}; // in builder reset is trigged automatically
+		void reset() override {}; // in builder reset is trigged automatically
 
-		virtual bool ready() override { return true;} // no need for preparation
+		bool ready() override { return true;} // no need for preparation
 
 		void addTokens(token tok, std::string str);
 

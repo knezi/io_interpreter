@@ -9,16 +9,16 @@
 
 class Interpreter {
 	public:
-		Interpreter(tokenizer& tok_, bool terminator_):
+		Interpreter(tokenizerBase& tok_, bool terminator_):
 			Interpreter(tok_, terminator_, std::make_shared<Object>()) {};
-		Interpreter(tokenizer& tok_, bool terminator_, obj_ptr main_);
+		Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_);
 
 		std::shared_ptr<Object> lastScope() {
 			return old_scope;
 		}
 
 	private:
-		tokenizer& tok;
+		tokenizerBase& tok;
 		obj_ptr curr_scope;
 		obj_ptr function_scope;
 		obj_ptr main;

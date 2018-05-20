@@ -1,8 +1,8 @@
 #ifndef scope_hpp_
 #define scope_hpp_
 
-#include <map>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -13,18 +13,18 @@ class Function;
 class Object;
 class Arguments;
 
-typedef std::shared_ptr<Object> obj_ptr;
+using obj_ptr=std::shared_ptr<Object>;
 
 class Object {
 	public:
 		Object(): callable{false} {}
 		Object(bool c): callable{c} {}
 
-		Object(Object&& f) = default;
-		Object(const Object& f) = default;
+	 	Object(Object&& f) = default;
+		Object(const Object& f);
 		Object& operator=(Object&& f) = default;
-		Object& operator=(const Object& f) = default;
-		virtual ~Object() {};
+		Object& operator=(const Object& f);
+		virtual ~Object() = default;
 
 		obj_ptr getSlot(const std::string& ObjectName);
 
@@ -60,6 +60,8 @@ class Object {
 		std::map<std::string, obj_ptr> Objects;
 		// Object tmp_copy;
 		// bool tmp_copy_valid;
+
+		void copy_object(const Object& o);
 };
 
 
@@ -69,12 +71,12 @@ class Function: public Object {
 		Function(func f_): f{f_}, Object{true} {}
 
 		Function(Function&& f) = default;
-		Function(const Function& f) = default;
+		Function(const Function& f);
 		Function& operator=(Function&& f) = default;
 		Function& operator=(const Function& f) = default;
 		virtual ~Function() {};
 
-		virtual obj_ptr operator()(obj_ptr function_scope, Arguments& args) override {
+		obj_ptr operator()(obj_ptr function_scope, Arguments& args) override {
 			return f(function_scope, args);
 		}
 
@@ -87,23 +89,26 @@ class Function: public Object {
 class Arguments {
 	public:
 		Arguments();
-		Arguments(tokenizer& tok);
+		Arguments(tokenizerBase& tok);
 
-		token nextToken() {
-			return tokens[i++].first;
+		void move() {
+			++it;
+		}
+
+		token currToken() {
+			return it->first;
 		}
 
 		std::string flush() {
-			// TODO dirty
-			return tokens[i-1].second;
+			return it->second;
 		}
 
 		bool eof() {
-			return tokens.size()==i;
+			return tokens.end()==it;
 		}
 
 	private:
 		std::vector<std::pair<token, std::string>> tokens;
-		size_t i;
+		std::vector<std::pair<token, std::string>>::iterator it;
 };
 #endif
