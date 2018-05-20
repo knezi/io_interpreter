@@ -15,7 +15,7 @@ int main(int argc, char * * argv) {
 	processStream in(iff);
 	tokenizer tok(in);
 	cout<<"####"<<endl;
-	Interpreter run(tok, false);
+	// Interpreter run(tok, false);
 	
 	// tok.prepare();
 	// token a=tok.nextToken();
@@ -23,7 +23,6 @@ int main(int argc, char * * argv) {
 		// cout<<(int)a<<" "<<tok.flush()<<endl;
 		// a=tok.nextToken();
 	// }
-
-
+	//
 	return 0;
 }

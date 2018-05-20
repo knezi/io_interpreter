@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 
+template<typename func>
 class Function;
 class Object;
 class Arguments;
@@ -70,9 +71,10 @@ class Object {
 };
 
 
+template<typename func>
 class Function: public Object {
 	public:
-		Function(obj_ptr (*f_)(obj_ptr, Arguments&)): f{f_}, Object{true} {}
+		Function(func f_): f{f_}, Object{true} {}
 
 		Function(Function&& f) = default;
 		Function(const Function& f) = default;
@@ -84,7 +86,7 @@ class Function: public Object {
 		}
 
 	private:
-		obj_ptr (*f)(obj_ptr, Arguments&);
+		func f;
 };
 
 
@@ -103,8 +105,10 @@ class PrimitiveType: public Object {
 		t value;
 
 		void addBuiltIns() {
-			addIntoSlot("print", std::make_shared<Function>(builtins::print<PrimitiveType<t>>));
-			addIntoSlot("++", std::make_shared<Function>(builtins::increment<PrimitiveType<t>>));
+			addIntoSlot("print", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(builtins::print<PrimitiveType<t>>));
+			addIntoSlot("++", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(builtins::increment<PrimitiveType<t>>));
+			auto a=std::make_shared<Function<builtins::method>>(builtins::method(10));
+			addIntoSlot("method", a);
 		}
 };
 

@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <queue>
 
 #ifdef DEBUG
 #include <iostream>
@@ -133,29 +134,42 @@ class tokenBox: public box {
 //                     WC1 <---+         +-<---------- Comma <--------+    WC1 <--+
 // Next BOX is always unambiguously defined - not true!! TODO
 
-class tokenizer {
+class tokenizerBase {
 	public:
-		tokenizer(processStream& in): in_(in) {};
+		tokenizerBase() {};
+		virtual ~tokenizerBase() {};
+		virtual void prepare() = 0;
+		virtual token nextToken() = 0;
+		virtual std::string flush() = 0;
+		virtual bool eof() = 0;
+		virtual void reset() = 0;
+		virtual bool ready() = 0;
+};
+
+class tokenizer: public tokenizerBase {
+	public:
+		tokenizer(processStream& in): in_{in}, tokenizerBase{} {};
+		virtual ~tokenizer() = default;
 
 		// this cannnot be called from the constructor to avoid indefinite
 		// recursion tokenizer -> argumentBox -> tokenizer
-		void prepare();
+		virtual void prepare() override;
 
-		token nextToken();
+		virtual token nextToken() override;
 
-		std::string flush() {
+		virtual std::string flush() override {
 			return in_.flush();
 		}
 
-		bool eof() {
+		virtual bool eof() override {
 			return in_.eof();
 		}
 
-		void reset() {
+		virtual void reset() override {
 			curr_=boxes_.find("WC1")->second.get();
 		};
 
-		bool ready() {
+		virtual bool ready() override {
 			return ready_;
 		}
 
@@ -164,6 +178,48 @@ class tokenizer {
 		std::map<std::string, std::unique_ptr<box> > boxes_;
 		processStream& in_;
 		bool ready_=false;
+};
+
+typedef std::queue<std::pair<token, std::string>> tokenque;
+class tokenizerBuilder: public tokenizerBase {
+	public:
+		tokenizerBuilder(): tokens{} {};
+		virtual ~tokenizerBuilder() = default;
+		virtual void prepare() override {}; // just to override base
+
+		virtual token nextToken() override {
+			currString=tokens.front().second;
+			token currToken=tokens.front().first;
+			tokens.pop();
+			return currToken;
+		}
+
+		virtual std::string flush() override {
+			return currString;
+		}
+
+		virtual bool eof() override {
+			return tokens.empty();
+		}
+
+		virtual void reset() override {}; // in builder reset is trigged automatically
+
+		virtual bool ready() override { return true;} // no need for preparation
+
+		void addTokens(token tok, std::string str) {
+			tokens.push({tok, str});
+		}
+
+		void addTokens(tokenque q) {
+			while(!q.empty()) {
+				tokens.push(q.front());
+				q.pop();
+			}
+		}
+
+	private:
+		tokenque tokens;
+		std::string currString;
 };
 
 
