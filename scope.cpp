@@ -15,34 +15,38 @@ obj_ptr Object::operator()(obj_ptr function_scope, Arguments& args) {
 	return std::shared_ptr<Object>(this);
 }
 
-Object::Object(const Object& o): callable{o.callable} {
-	std::cout<<"A"<<std::endl;
-	copy_object(o);
+// Object::Object(const Object& o): callable{o.callable} {
+	// std::cout<<"A"<<std::endl;
+	// copy_object(o);
+// }
+
+// Object& Object::operator=(const Object& o) {
+	// std::cout<<"A"<<std::endl;
+	// // TODO callable
+	// copy_object(o);
+	// return *this;
+// }
+
+obj_ptr Object::clone() {
+	obj_ptr new_obj=std::make_shared<Object>(callable);
+	cloneScope(new_obj);
+	return new_obj;
 }
 
-Object& Object::operator=(const Object& o) {
-	std::cout<<"A"<<std::endl;
-	// TODO callable
-	copy_object(o);
-	return *this;
-}
-
-void Object::copy_object(const Object& src) {
-	for(auto &&o:src.Objects) {
+void Object::cloneScope(const obj_ptr& new_obj) {
+	for(auto &&o:Objects) {
 		std::cout<<"copying"<<o.first<<std::endl;
-		Objects.insert({o.first, std::make_shared<Object>(o.second.get())});
+		new_obj->addIntoSlot(o.first, o.second->clone());
 	}
 }
 
 
 // FUNCTION CLASS DEFINITON
-template<typename func>
-Function<func>::Function(const Function& fo): Object{fo}, f{fo.f} {};
 
 // ARGUMENTS CLASS DEFINITION
-Arguments::Arguments(): tokens{} { it=tokens.begin(); };
+Arguments::Arguments() { it=tokens.begin(); };
 
-Arguments::Arguments(tokenizerBase& tok): tokens{} {
+Arguments::Arguments(tokenizerBase& tok) {
 	token currToken=tok.nextToken();
 	while(currToken!=token::closeArguments) {
 		std::cout<<"ARG "<<(int)currToken<<std::endl;

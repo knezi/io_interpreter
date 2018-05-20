@@ -90,7 +90,7 @@ void Interpreter::processSymbol() {
 			// TODO prasarna
 			std::cout<<"ADDING "<<s<<std::endl;
 			// WTIF?
-			auto copy=std::make_shared<Object>(expr.lastScope().get());
+			obj_ptr copy=(expr.lastScope())->clone();
 			curr_scope->addIntoSlot(s, copy);
 			// curr_scope->addIntoSlot(s, expr.lastScope());
 			resetScope();
@@ -120,30 +120,6 @@ int main(int argc, char * * argv) {
 	tokenizer tok(in);
 	cout<<"####"<<endl;
 	Interpreter run(tok, false);
-	
-	// auto a=std::make_shared<Object>();
-	// Object a;
-	// auto n=std::make_shared<builtins::Number>(10);
-	// a.addIntoSlot("10", n);
-	
-	// auto b=std::make_shared<Object>(a.get());
-	// Object b(a);
-
-	// Arguments args;
-	// auto no=a.getSlot("10");
-	// (*(no->getSlot("++")))(no, args);
-	// (*(no->getSlot("print")))(no, args);
-
-	// no=b.getSlot("10");
-	// cout<<&*no<<endl;
-	// (*(no->getSlot("++")))(no, args);
-	// (*(no->getSlot("print")))(no, args);
-
-	// auto a=std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(builtins::createMethod);
-	// Arguments args;
-	// auto main=std::make_shared<Object>();
-	// auto cc=(*a)(main, args);
-	// (*cc)(main, args);
 
 	return 0;
 }

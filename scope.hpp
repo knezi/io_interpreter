@@ -21,9 +21,9 @@ class Object {
 		Object(bool c): callable{c} {}
 
 	 	Object(Object&& f) = default;
-		Object(const Object& f);
+		Object(const Object& f) = delete;
 		Object& operator=(Object&& f) = default;
-		Object& operator=(const Object& f);
+		Object& operator=(const Object& f) = delete;
 		virtual ~Object() = default;
 
 		obj_ptr getSlot(const std::string& ObjectName);
@@ -31,8 +31,8 @@ class Object {
 		// TODO add to cpp
 		template<typename str>
 		void addIntoSlot(str&& ObjectName, obj_ptr obj) {
-			Objects.insert({std::forward<str>(ObjectName),
-					std::move(obj)});
+			Objects.insert_or_assign(std::forward<str>(ObjectName),
+					std::move(obj));
 		}
 
 		virtual obj_ptr operator()(obj_ptr function_scope, Arguments& args);
@@ -56,12 +56,14 @@ class Object {
 			// tmp_copy=obj;
 		// }
 
+		virtual obj_ptr clone();
 	private:
 		std::map<std::string, obj_ptr> Objects;
 		// Object tmp_copy;
 		// bool tmp_copy_valid;
 
-		void copy_object(const Object& o);
+	protected:
+		void cloneScope(const obj_ptr& new_obj);
 };
 
 
@@ -71,13 +73,19 @@ class Function: public Object {
 		Function(func f_): f{f_}, Object{true} {}
 
 		Function(Function&& f) = default;
-		Function(const Function& f);
+		Function(const Function& f) = delete;
 		Function& operator=(Function&& f) = default;
 		Function& operator=(const Function& f) = default;
 		virtual ~Function() {};
 
 		obj_ptr operator()(obj_ptr function_scope, Arguments& args) override {
 			return f(function_scope, args);
+		}
+
+		obj_ptr clone() override {
+			obj_ptr new_obj=std::make_shared<Function<func>>(f);
+			cloneScope(new_obj);
+			return new_obj;
 		}
 
 	private:

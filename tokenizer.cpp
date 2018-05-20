@@ -340,10 +340,8 @@ token argumentBox::parseToken() { // TODO move code to BASE class
 
 // TOKENIZERBUILDER CLASS DEFINITION
 token tokenizerBuilder::nextToken() {
-	currString=tokens.front().second;
-	token currToken=tokens.front().first;
-	tokens.pop();
-	return currToken;
+	currString=it->second;
+	return (it++)->first;
 }
 
 std::string tokenizerBuilder::flush() {
@@ -351,16 +349,15 @@ std::string tokenizerBuilder::flush() {
 }
 
 bool tokenizerBuilder::eof() {
-	return tokens.empty();
+	return it==tokens.end();
 }
 
 void tokenizerBuilder::addTokens(token tok, std::string str) {
-	tokens.emplace(tok, str);
+	tokens.emplace_back(tok, str);
 }
 
-void tokenizerBuilder::addTokens(tokenque q) {
-	while(!q.empty()) {
-		tokens.push(q.front());
-		q.pop();
+void tokenizerBuilder::addTokens(const tokenlist& q) {
+	for(auto&& tok:q) {
+		tokens.push_back(tok);
 	}
 }

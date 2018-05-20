@@ -180,7 +180,7 @@ class tokenizer: public tokenizerBase {
 		bool ready_=false;
 };
 
-using tokenque=std::queue<std::pair<token, std::string>>;
+using tokenlist=std::vector<std::pair<token, std::string>>;
 class tokenizerBuilder: public tokenizerBase {
 	public:
 		~tokenizerBuilder() override = default;
@@ -198,10 +198,13 @@ class tokenizerBuilder: public tokenizerBase {
 
 		void addTokens(token tok, std::string str);
 
-		void addTokens(tokenque q);
+		void addTokens(const tokenlist& q);
+
+		void restart() {  it=tokens.begin(); };
 
 	private:
-		tokenque tokens;
+		tokenlist tokens;
+		tokenlist::iterator it;
 		std::string currString;
 };
 
