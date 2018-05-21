@@ -47,11 +47,17 @@ void Object::cloneScope(const obj_ptr& new_obj) {
 Arguments::Arguments() { it=tokens.begin(); };
 
 Arguments::Arguments(tokenizerBase& tok) {
+	size_t closing=1;
 	token currToken=tok.nextToken();
-	while(currToken!=token::closeArguments) {
+	if(currToken==token::closeArguments) --closing;
+	if(currToken==token::openArguments) ++closing;
+
+	while(closing>0) {
 		std::cout<<"ARG "<<(int)currToken<<std::endl;
 		tokens.emplace_back(currToken, tok.flush());
 		currToken=tok.nextToken();
+		if(currToken==token::closeArguments) --closing;
+		if(currToken==token::openArguments) ++closing;
 	}
 
 	it=tokens.begin();

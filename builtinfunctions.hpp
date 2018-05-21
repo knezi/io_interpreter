@@ -3,6 +3,8 @@
 
 #include "scope.hpp"
 #include "tokenizer.hpp"
+#include "interpreter.hpp"
+
 #include <memory>
 
 
@@ -22,6 +24,12 @@ inline obj_ptr increment(obj_ptr scope, Arguments& args) {
 	++((t*)scope.get())->value;
 	return scope;
 }
+
+template<typename t>
+obj_ptr plus(obj_ptr scope, Arguments& args); 
+
+template<typename t>
+obj_ptr times(obj_ptr scope, Arguments& args); 
 
 inline obj_ptr hello(obj_ptr scope, Arguments& args) {
 	std::cout<<"HELLO WORLD"<<std::endl;
@@ -63,6 +71,8 @@ class PrimitiveType: public Object {
 		void addBuiltIns() {
 			addIntoSlot("print", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(print<PrimitiveType<t>>));
 			addIntoSlot("++", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(builtins::increment<PrimitiveType<t>>));
+			addIntoSlot("+", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(builtins::plus<PrimitiveType<t>>));
+			addIntoSlot("*", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(builtins::times<PrimitiveType<t>>));
 		};
 
 		obj_ptr clone() override {

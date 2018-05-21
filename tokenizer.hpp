@@ -196,7 +196,7 @@ class tokenizerBuilder: public tokenizerBase {
 
 		bool ready() override { return true;} // no need for preparation
 
-		void addTokens(token tok, std::string str);
+		void addToken(token tok, std::string str);
 
 		void addTokens(const tokenlist& q);
 

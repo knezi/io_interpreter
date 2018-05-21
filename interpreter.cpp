@@ -28,6 +28,17 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 				currToken=tok.nextToken();
 			}else{
 				Arguments args;
+				if(currToken==token::symbol) {
+					std::string symbol=tok.flush();
+					while(symbolPriority(symbol)>curr_scope_priority) {
+						args.addToken(currToken, symbol);
+						currToken=tok.nextToken();
+						if(currToken!=token::symbol) break;
+						symbol=tok.flush();
+					}
+				}
+				args.restart();
+
 				curr_scope=(*curr_scope)(function_scope, args);
 			}
 		}
@@ -41,6 +52,10 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 			case token::terminator:
 			case token::endOfBlock:
 				resetScope();
+				break;
+
+			case token::openArguments:
+				runBlock();
 				break;
 
 			default:
@@ -57,6 +72,9 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 void Interpreter::processSymbol() {
 	std::string s=tok.flush();
 	std::cout<<"SYMBOL "<<s<<std::endl;
+	if(s=="")
+		return;
+
 	bool no=true;
 	// std::cout<<"Calling print"<<std::endl;
 	for(auto&& c:s) {
@@ -96,13 +114,40 @@ void Interpreter::processSymbol() {
 			resetScope();
 		}else{
 			// TODO throw exception
-			throw std::exception();
+			throw std::logic_error("Slot "+s+" not defined.");
 		}
 	}else{
-		if(next_slot->callable)
+		if(next_slot->callable) {
 			function_scope=curr_scope;
+			curr_scope_priority=symbolPriority(s);
+		}
 		curr_scope=next_slot;
 	}
+}
+
+void Interpreter::runBlock() {
+	tokenizerBuilder block;
+	size_t closing=1;
+	tok.flush();
+	token tmpToken=tok.nextToken();
+	if(tmpToken==token::closeArguments) --closing;
+	if(tmpToken==token::openArguments) ++closing;
+
+	while(closing>0) {
+		std::cout<<"ARG "<<(int)tmpToken<<std::endl;
+		block.addToken(tmpToken, tok.flush());
+		tmpToken=tok.nextToken();
+		if(tmpToken==token::closeArguments) --closing;
+		if(tmpToken==token::openArguments) ++closing;
+	}
+
+	block.addToken(token::terminator, "");
+
+	tok.flush(); // flush the trailing )
+	block.restart();
+
+	Interpreter block_exec(block, false, curr_scope);
+	curr_scope=block_exec.lastScope()->clone();
 }
 
 void Interpreter::resetScope() {
@@ -120,6 +165,7 @@ int main(int argc, char * * argv) {
 	tokenizer tok(in);
 	cout<<"####"<<endl;
 	Interpreter run(tok, false);
+
 
 	return 0;
 }

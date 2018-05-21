@@ -119,10 +119,11 @@ token parseOneChar(processStream& in) {
 
 token parseSymbol(processStream& in) {
 	charGroup group=in.getCurrent();
-	if(group!=charGroup::alphanum &&
-			group!=charGroup::quote &&
-			group!=charGroup::op)
-		return token::invalidCharacter;
+	// star alone is a symbol
+	if(group==charGroup::star) {
+		in.move();
+		return token::symbol;
+	}
 	
 	while(group==charGroup::alphanum ||
 			group==charGroup::quote ||
@@ -252,6 +253,7 @@ void tokenizer::prepare() {
 
 											{"WC1", "BlockEnd"}, 
 	
+						// lower priority than Terminator and BlokEnd
 											{"WC1", "Symbol"},
 											{"Symbol", "WC2"},
 											{"WC2", "Open"},
@@ -352,7 +354,7 @@ bool tokenizerBuilder::eof() {
 	return it==tokens.end();
 }
 
-void tokenizerBuilder::addTokens(token tok, std::string str) {
+void tokenizerBuilder::addToken(token tok, std::string str) {
 	tokens.emplace_back(tok, str);
 }
 

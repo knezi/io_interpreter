@@ -20,6 +20,7 @@ class Interpreter {
 	private:
 		tokenizerBase& tok;
 		obj_ptr curr_scope;
+		size_t curr_scope_priority;
 		obj_ptr function_scope;
 		obj_ptr main;
 		obj_ptr old_scope;
@@ -27,5 +28,6 @@ class Interpreter {
 		bool terminator;
 		void processSymbol();
 		void resetScope();
+		void runBlock();
 };
 #endif

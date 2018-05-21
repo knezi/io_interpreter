@@ -99,6 +99,11 @@ class Arguments {
 		Arguments();
 		Arguments(tokenizerBase& tok);
 
+		void addToken(token t, const std::string& s) {
+			std::cout<<"ADDING "<<(int)t<<std::endl;
+			tokens.emplace_back(t, s);
+		}
+
 		void move() {
 			++it;
 		}
@@ -115,8 +120,23 @@ class Arguments {
 			return tokens.end()==it;
 		}
 
+		void restart() {
+			it=tokens.begin();
+		}
+
 	private:
 		std::vector<std::pair<token, std::string>> tokens;
 		std::vector<std::pair<token, std::string>>::iterator it;
 };
+
+inline size_t symbolPriority(const std::string& sym) {
+	if(sym=="+" || sym=="-")
+		return 1;
+
+	if(sym=="*" || sym=="/") // TODO NOT A SYMBOL
+		return 2;
+	
+	// functions
+	return 3;
+}
 #endif

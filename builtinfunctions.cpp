@@ -63,4 +63,67 @@ obj_ptr Method::operator()(obj_ptr scope, Arguments& args) {
 	// return new_obj;
 // }
 
+template<typename t>
+obj_ptr plus(obj_ptr scope, Arguments& args) {
+	token currToken;
+	std::vector<tokenlist> tokens;
+	tokenizerBuilder tok;
+
+	while(!args.eof()) {
+		tokens.emplace_back();
+
+		do{
+			currToken=args.currToken();
+			if(currToken==token::nextArgument) break;
+
+			tokens[tokens.size()-1].emplace_back(currToken, args.flush());
+			args.move();
+		} while(!args.eof());
+	}
+
+	tokens[tokens.size()-1].emplace_back(token::endOfBlock, "");
+	
+	tok.addTokens(tokens[tokens.size()-1]);
+	tok.restart();
+
+	Interpreter execute(tok, false, scope);
+
+	((t*)scope.get())->value+=((t*)execute.lastScope().get())->value;
+	return scope;
+}
+
+
+template obj_ptr plus<Number>(obj_ptr scope, Arguments& args);
+
+template<typename t>
+obj_ptr times(obj_ptr scope, Arguments& args) {
+	token currToken;
+	std::vector<tokenlist> tokens;
+	tokenizerBuilder tok;
+
+	while(!args.eof()) {
+		tokens.emplace_back();
+
+		do{
+			currToken=args.currToken();
+			if(currToken==token::nextArgument) break;
+
+			tokens[tokens.size()-1].emplace_back(currToken, args.flush());
+			args.move();
+		} while(!args.eof());
+	}
+
+	tokens[tokens.size()-1].emplace_back(token::endOfBlock, "");
+	
+	tok.addTokens(tokens[tokens.size()-1]);
+	tok.restart();
+
+	Interpreter execute(tok, false, scope);
+
+	((t*)scope.get())->value*=((t*)execute.lastScope().get())->value;
+	return scope;
+}
+
+
+template obj_ptr times<Number>(obj_ptr scope, Arguments& args);
 };
