@@ -69,6 +69,13 @@ void Interpreter::processSymbol() {
 	if(s=="")
 		return;
 
+	if(s=="True" || s=="False") {
+		auto new_obj=builtins::new_bool(s[0]=='T');
+		curr_scope->addIntoSlot(s, new_obj);
+		curr_scope=curr_scope->getSlot(s);
+		return;
+	}
+
 	bool no=true;
 	for(auto&& c:s) {
 		if(!('0'<=c && c<='9')) {
@@ -79,12 +86,12 @@ void Interpreter::processSymbol() {
 
 	if(no) {
 		// TODO TMP
-		std::shared_ptr<builtins::Number> new_no=std::make_shared<builtins::Number>(stoi(s));
+		auto new_no=builtins::new_number(stoi(s));
 		curr_scope->addIntoSlot(s, new_no);
 		curr_scope=curr_scope->getSlot(s);
 		return;
 	}
-
+	
 	obj_ptr next_slot=curr_scope->getSlot(s);
 
 	// the following must be := or die

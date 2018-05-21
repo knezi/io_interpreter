@@ -14,6 +14,7 @@ class Arguments;
 
 
 using obj_ptr=std::shared_ptr<Object>;
+using func_ptr=obj_ptr (*) (obj_ptr, Arguments&);
 
 class Object {
 	public:

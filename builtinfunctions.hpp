@@ -15,26 +15,21 @@ using Number=PrimitiveType<uint_least64_t>;
 using Bool=PrimitiveType<bool>;
 
 template<typename t>
-// struct traits {
-	inline obj_ptr print(obj_ptr scope, Arguments& args) {
+struct traits {
+	static obj_ptr print(obj_ptr scope, Arguments& args) {
 		//TODO
 		std::cout<<"PRINTING VALUE ";
 		std::cout<<((t*)scope.get())->value;
 		std::cout<<std::endl;
 		return scope;
 	}
-// };
+};
 
-// template<Bool>
-// struct traits {
-	// inline obj_ptr print(obj_ptr scope, Arguments& args) {
-		// //TODO
-		// std::cout<<"VALUE ";
-		// std::cout<<((Bool*)scope.get())->value;
-		// std::cout<<std::endl;
-		// return scope;
-	// }
-// };
+template<>
+struct traits<Bool> {
+	static obj_ptr print(obj_ptr scope, Arguments& args);
+};
+
 
 template<typename t>
 inline obj_ptr increment(obj_ptr scope, Arguments& args) {
@@ -83,9 +78,9 @@ inline obj_ptr createMethod(obj_ptr scope, Arguments& args) {
 template<typename t>
 class PrimitiveType: public Object {
 	public:
-		PrimitiveType(): value{} { addBuiltIns(); }; 
-		PrimitiveType(t&& v): value{v} { addBuiltIns(); }; 
-		PrimitiveType(const t& v): value{v} { addBuiltIns(); }; 
+		PrimitiveType(): value{} {}; 
+		PrimitiveType(t&& v): value{v} {}; 
+		PrimitiveType(const t& v): value{v} {}; 
 
 		PrimitiveType(PrimitiveType&& f) noexcept = default;
 		PrimitiveType(const PrimitiveType& f) = delete;
@@ -95,19 +90,48 @@ class PrimitiveType: public Object {
 
 		t value;
 
-		void addBuiltIns() {
-			addIntoSlot("print", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(print<PrimitiveType<t>>));
-			addIntoSlot("++", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(builtins::increment<PrimitiveType<t>>));
-			addIntoSlot("+", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(builtins::plus<PrimitiveType<t>>));
-			addIntoSlot("*", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(builtins::times<PrimitiveType<t>>));
-		};
-
 		obj_ptr clone() override {
 			obj_ptr new_obj=std::make_shared<PrimitiveType<t>>(value);
 			cloneScope(new_obj);
 			return new_obj;
 		}
 };
+
+inline obj_ptr new_bool(bool val) {
+	auto new_no=std::make_shared<builtins::Bool>(val);
+	new_no->addIntoSlot("print",
+			std::make_shared<Function<func_ptr>>(traits<Bool>::print));
+
+	return new_no;
+}
+
+template<typename t>
+inline obj_ptr equality(obj_ptr scope, Arguments& args) {
+	obj_ptr val=args.execute(scope);
+	if(((t*)scope.get())->value==((t*)val.get())->value)
+		return new_bool(true);
+	return new_bool(false);
+}
+
+inline obj_ptr new_number(int val) {
+	auto new_no=std::make_shared<builtins::Number>(val);
+	new_no->addIntoSlot("print",
+			std::make_shared<Function<func_ptr>>(traits<Number>::print));
+
+	new_no->addIntoSlot("++",
+			std::make_shared<Function<func_ptr>>(builtins::increment<Number>));
+
+	new_no->addIntoSlot("+",
+			std::make_shared<Function<func_ptr>>(builtins::plus<Number>));
+
+	new_no->addIntoSlot("*",
+			std::make_shared<Function<func_ptr>>(builtins::times<Number>));
+
+	new_no->addIntoSlot("==",
+			std::make_shared<Function<func_ptr>>(builtins::equality<Number>));
+
+	return new_no;
+}
 
 };
 #endif
