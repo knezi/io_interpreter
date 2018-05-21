@@ -6,12 +6,12 @@
 #include <memory>
 #include <vector>
 
-#include "tokenizer.hpp"
 
 template<typename func>
 class Function;
 class Object;
 class Arguments;
+
 
 using obj_ptr=std::shared_ptr<Object>;
 
@@ -28,7 +28,6 @@ class Object {
 
 		obj_ptr getSlot(const std::string& ObjectName);
 
-		// TODO add to cpp
 		template<typename str>
 		void addIntoSlot(str&& ObjectName, obj_ptr obj) {
 			Objects.insert_or_assign(std::forward<str>(ObjectName),
@@ -38,29 +37,10 @@ class Object {
 		virtual obj_ptr operator()(obj_ptr function_scope, Arguments& args);
 
 		const bool callable;
-
-		// Object& getNextObject() {
-			// // TODO zinvalidovat??
-			// if(tmp_copy_valid)
-				// return tmp_copy;
-			// return *this;
-		// }
-
-		// void setNextObject(Object && obj) {
-			// tmp_copy_valid=true;
-			// tmp_copy=obj;
-		// }
-
-		// void setNextObject(const Object & obj) {
-			// tmp_copy_valid=true;
-			// tmp_copy=obj;
-		// }
-
 		virtual obj_ptr clone();
+
 	private:
 		std::map<std::string, obj_ptr> Objects;
-		// Object tmp_copy;
-		// bool tmp_copy_valid;
 
 	protected:
 		void cloneScope(const obj_ptr& new_obj);
@@ -93,14 +73,21 @@ class Function: public Object {
 };
 
 
+#include "tokenizer.hpp"
 
 class Arguments {
 	public:
 		Arguments();
 		Arguments(tokenizerBase& tok);
 
+		Arguments(Arguments && a) = default;
+		Arguments(const Arguments & a) = default;
+		Arguments& operator=(Arguments && a) = default;
+		Arguments& operator=(const Arguments & a) = default;
+
+		obj_ptr execute(obj_ptr& scope);
+
 		void addToken(token t, const std::string& s) {
-			std::cout<<"ADDING "<<(int)t<<std::endl;
 			tokens.emplace_back(t, s);
 		}
 
@@ -108,17 +95,18 @@ class Arguments {
 			++it;
 		}
 
-		token currToken() {
-			return it->first;
-		}
+		// TODO remove
+		// token currToken() {
+			// return it->first;
+		// }
 
-		std::string flush() {
-			return it->second;
-		}
+		// std::string flush() {
+			// return it->second;
+		// }
 
-		bool eof() {
-			return tokens.end()==it;
-		}
+		// bool eof() {
+			// return tokens.end()==it;
+		// }
 
 		void restart() {
 			it=tokens.begin();
@@ -133,7 +121,7 @@ inline size_t symbolPriority(const std::string& sym) {
 	if(sym=="+" || sym=="-")
 		return 1;
 
-	if(sym=="*" || sym=="/") // TODO NOT A SYMBOL
+	if(sym=="*" || sym=="/")
 		return 2;
 	
 	// functions

@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+
 #include "tokenizer.hpp"
 
 // PROCESS STREAM
@@ -341,6 +342,11 @@ token argumentBox::parseToken() { // TODO move code to BASE class
 
 
 // TOKENIZERBUILDER CLASS DEFINITION
+tokenizerBuilder::tokenizerBuilder(tokenlist& ts) {
+	addTokens(ts);
+	it=tokens.begin();
+}
+
 token tokenizerBuilder::nextToken() {
 	currString=it->second;
 	return (it++)->first;
@@ -354,8 +360,12 @@ bool tokenizerBuilder::eof() {
 	return it==tokens.end();
 }
 
-void tokenizerBuilder::addToken(token tok, std::string str) {
+void tokenizerBuilder::addToken(token tok, const std::string& str) {
 	tokens.emplace_back(tok, str);
+}
+
+void tokenizerBuilder::addToken(token tok, std::string&& str) {
+	tokens.emplace_back(tok, std::move(str));
 }
 
 void tokenizerBuilder::addTokens(const tokenlist& q) {

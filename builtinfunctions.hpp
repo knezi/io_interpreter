@@ -10,13 +10,31 @@
 
 namespace builtins {
 template<typename t>
-inline obj_ptr print(obj_ptr scope, Arguments& args) {
-	//TODO
-	std::cout<<"PRINTING VALUE ";
-	std::cout<<((t*)scope.get())->value;
-	std::cout<<std::endl;
-	return scope;
-}
+class PrimitiveType;
+using Number=PrimitiveType<uint_least64_t>;
+using Bool=PrimitiveType<bool>;
+
+template<typename t>
+// struct traits {
+	inline obj_ptr print(obj_ptr scope, Arguments& args) {
+		//TODO
+		std::cout<<"PRINTING VALUE ";
+		std::cout<<((t*)scope.get())->value;
+		std::cout<<std::endl;
+		return scope;
+	}
+// };
+
+// template<Bool>
+// struct traits {
+	// inline obj_ptr print(obj_ptr scope, Arguments& args) {
+		// //TODO
+		// std::cout<<"VALUE ";
+		// std::cout<<((Bool*)scope.get())->value;
+		// std::cout<<std::endl;
+		// return scope;
+	// }
+// };
 
 template<typename t>
 inline obj_ptr increment(obj_ptr scope, Arguments& args) {
@@ -26,10 +44,18 @@ inline obj_ptr increment(obj_ptr scope, Arguments& args) {
 }
 
 template<typename t>
-obj_ptr plus(obj_ptr scope, Arguments& args); 
+inline obj_ptr plus(obj_ptr scope, Arguments& args) {
+	obj_ptr val=args.execute(scope);
+	((t*)scope.get())->value+=((t*)val.get())->value;
+	return scope;
+}
 
 template<typename t>
-obj_ptr times(obj_ptr scope, Arguments& args); 
+inline obj_ptr times(obj_ptr scope, Arguments& args) {
+	obj_ptr val=args.execute(scope);
+	((t*)scope.get())->value*=((t*)val.get())->value;
+	return scope;
+}
 
 inline obj_ptr hello(obj_ptr scope, Arguments& args) {
 	std::cout<<"HELLO WORLD"<<std::endl;
@@ -39,16 +65,17 @@ inline obj_ptr hello(obj_ptr scope, Arguments& args) {
 // creates method callable object
 class Method {
 	public:
-		Method(Arguments& args);
+		Method(Arguments&& args_): args{std::move(args_)} {};
+		Method(const Arguments& args_): args{args_} {};
+
 		obj_ptr operator()(obj_ptr scope, Arguments& args);
 
 	private:
-		tokenizerBuilder tok;
+		Arguments args;
 		std::vector<tokenlist> tokens;
 };
 
 inline obj_ptr createMethod(obj_ptr scope, Arguments& args) {
-	// TODO builder
 	auto func=std::make_shared<Function<Method>>(Method(args));
 	return func;
 }
@@ -82,6 +109,5 @@ class PrimitiveType: public Object {
 		}
 };
 
-typedef PrimitiveType<uint_least64_t> Number;
 };
 #endif

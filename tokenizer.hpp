@@ -8,10 +8,14 @@
 #include <map>
 #include <queue>
 
+
 #ifdef DEBUG
 #include <iostream>
 #endif
 
+class tokenizer;
+class tokenizerBase;
+class tokenizerBuilder;
 
 // STREAM
 
@@ -180,26 +184,30 @@ class tokenizer: public tokenizerBase {
 		bool ready_=false;
 };
 
+#include "scope.hpp"
+
 using tokenlist=std::vector<std::pair<token, std::string>>;
 class tokenizerBuilder: public tokenizerBase {
 	public:
+		tokenizerBuilder(tokenlist& tokens);
+		tokenizerBuilder(const tokenizerBuilder& b) = default;
+		tokenizerBuilder(tokenizerBuilder&& b) = default;
+		tokenizerBuilder& operator=(const tokenizerBuilder& b) = default;
+		tokenizerBuilder& operator=(tokenizerBuilder&& b) = default;
+
 		~tokenizerBuilder() override = default;
+
 		void prepare() override {}; // just to override base
-
-		token nextToken() override;
-
-		std::string flush() override;
-
-		bool eof() override;
-
 		void reset() override {}; // in builder reset is trigged automatically
-
 		bool ready() override { return true;} // no need for preparation
 
-		void addToken(token tok, std::string str);
+		token nextToken() override;
+		std::string flush() override;
+		bool eof() override;
 
+		void addToken(token tok, const std::string& str);
+		void addToken(token tok, std::string&& str);
 		void addTokens(const tokenlist& q);
-
 		void restart() {  it=tokens.begin(); };
 
 	private:

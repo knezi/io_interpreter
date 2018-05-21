@@ -7,22 +7,19 @@
 
 Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 	tok{tok_}, endAtTerminator{terminator_}, main{main_}{
-	main->addIntoSlot("method", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(builtins::createMethod));
 	// TODO
+	main->addIntoSlot("method", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(builtins::createMethod));
 	curr_scope=main;
 	tok.prepare();
 
 	token currToken;
 	do {
 		currToken=tok.nextToken();
-		std::cout<<"PROCESSING "<<(int)currToken<<std::endl;
 		terminator=false;
 		if(curr_scope->callable) {
-			std::cout<<"PREPARE METHOD"<<std::endl;
 
 			if(currToken==token::openArguments) {
 				tok.flush();
-				std::cout<<"READING ARGUMENTS "<<std::endl;
 				Arguments args=Arguments(tok);
 				curr_scope=(*curr_scope)(function_scope, args);
 				currToken=tok.nextToken();
@@ -37,6 +34,7 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 						symbol=tok.flush();
 					}
 				}
+				args.addToken(token::terminator, "");
 				args.restart();
 
 				curr_scope=(*curr_scope)(function_scope, args);
@@ -63,28 +61,21 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 		}
 	} while(!tok.eof() && currToken!=token::endOfBlock &&
 			!(endAtTerminator && terminator));
-
-	// TODO
-	// if(!tok.eof())
-		// std::cerr<<"File hasn't been properly ended."<<std::endl;
 }
 
 void Interpreter::processSymbol() {
 	std::string s=tok.flush();
-	std::cout<<"SYMBOL "<<s<<std::endl;
+	// std::cout<<"PROCESSING "<<s<<std::endl;
 	if(s=="")
 		return;
 
 	bool no=true;
-	// std::cout<<"Calling print"<<std::endl;
 	for(auto&& c:s) {
-	// std::cout<<"Calling print"<<std::endl;
 		if(!('0'<=c && c<='9')) {
 			no=false;
 			break;
 		}
 	}
-	// std::cout<<"Calling print"<<std::endl;
 
 	if(no) {
 		// TODO TMP
@@ -102,18 +93,11 @@ void Interpreter::processSymbol() {
 		std::string op=tok.flush();
 
 		if(nextTok==token::symbol && op==":=") {
-			std::cout<<">>"<<std::endl;
 			Interpreter expr(tok, true, curr_scope);
-			std::cout<<"<<"<<std::endl;
-			// TODO prasarna
-			std::cout<<"ADDING "<<s<<std::endl;
-			// WTIF?
 			obj_ptr copy=(expr.lastScope())->clone();
 			curr_scope->addIntoSlot(s, copy);
-			// curr_scope->addIntoSlot(s, expr.lastScope());
 			resetScope();
 		}else{
-			// TODO throw exception
 			throw std::logic_error("Slot "+s+" not defined.");
 		}
 	}else{
@@ -126,32 +110,11 @@ void Interpreter::processSymbol() {
 }
 
 void Interpreter::runBlock() {
-	tokenizerBuilder block;
-	size_t closing=1;
-	tok.flush();
-	token tmpToken=tok.nextToken();
-	if(tmpToken==token::closeArguments) --closing;
-	if(tmpToken==token::openArguments) ++closing;
-
-	while(closing>0) {
-		std::cout<<"ARG "<<(int)tmpToken<<std::endl;
-		block.addToken(tmpToken, tok.flush());
-		tmpToken=tok.nextToken();
-		if(tmpToken==token::closeArguments) --closing;
-		if(tmpToken==token::openArguments) ++closing;
-	}
-
-	block.addToken(token::terminator, "");
-
-	tok.flush(); // flush the trailing )
-	block.restart();
-
-	Interpreter block_exec(block, false, curr_scope);
-	curr_scope=block_exec.lastScope()->clone();
+	Arguments block(tok);
+	curr_scope=block.execute(curr_scope)->clone();
 }
 
 void Interpreter::resetScope() {
-	// std::cout<<"RESETING"<<std::endl;
 	old_scope=curr_scope;
 	curr_scope=main;
 	terminator=true;
@@ -160,7 +123,8 @@ void Interpreter::resetScope() {
 using namespace std;
 int main(int argc, char * * argv) {
 	// std::ifstream iff { "tests/testfile_correct.io" };
-	std::ifstream iff { "/home/knezi/Dokumenty/mff/cpp/zapoctak/tests/testfile.io" };
+	// std::ifstream iff { "/home/knezi/Dokumenty/mff/cpp/zapoctak/tests/testfile.io" };
+	std::ifstream iff { "tests/testfile.io" };
 	processStream in(iff);
 	tokenizer tok(in);
 	cout<<"####"<<endl;
