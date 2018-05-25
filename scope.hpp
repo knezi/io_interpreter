@@ -27,7 +27,7 @@ class Object {
 		Object& operator=(const Object& f) = delete;
 		virtual ~Object() = default;
 
-		obj_ptr getSlot(const std::string& ObjectName);
+		obj_ptr getSlot(const std::string& ObjectName) const;
 
 		template<typename str>
 		void addIntoSlot(str&& ObjectName, obj_ptr obj) {
@@ -38,12 +38,12 @@ class Object {
 		virtual obj_ptr operator()(obj_ptr function_scope, Arguments& args);
 
 		const bool callable;
-		virtual obj_ptr clone();
+		virtual obj_ptr clone() const;
 		void addUpperScope(obj_ptr upper) {
 			UpperScope=upper;
 		}
 
-		obj_ptr getUpperScope() {
+		obj_ptr getUpperScope() const {
 			return UpperScope;
 		}
 
@@ -52,7 +52,7 @@ class Object {
 		obj_ptr UpperScope;
 
 	protected:
-		void cloneScope(const obj_ptr& new_obj);
+		void cloneScope(const obj_ptr& new_obj) const;
 };
 
 
@@ -71,7 +71,7 @@ class Function: public Object {
 			return f(function_scope, args);
 		}
 
-		obj_ptr clone() override {
+		obj_ptr clone() const override {
 			obj_ptr new_obj=std::make_shared<Function<func>>(f);
 			cloneScope(new_obj);
 			return new_obj;
@@ -106,15 +106,15 @@ class Arguments {
 			++it;
 		}
 
-		token currToken() {
+		token currToken() const {
 			return it->first;
 		}
 
-		std::string flush() {
+		std::string flush() const {
 			return it->second;
 		}
 
-		bool eof() {
+		bool eof() const {
 			return tokens.end()==it;
 		}
 

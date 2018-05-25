@@ -2,7 +2,7 @@
 #include "interpreter.hpp"
 
 // OBJECT CLASS DEFINITION
-obj_ptr Object::getSlot(const std::string& ObjectName) {
+obj_ptr Object::getSlot(const std::string& ObjectName) const {
 	auto slot=Objects.find(ObjectName);
 	if(slot==Objects.end()) {
 		if(UpperScope.get()!=nullptr)
@@ -18,13 +18,13 @@ obj_ptr Object::operator()(obj_ptr function_scope, Arguments& args) {
 	return std::shared_ptr<Object>(this);
 }
 
-obj_ptr Object::clone() {
+obj_ptr Object::clone() const {
 	obj_ptr new_obj=std::make_shared<Object>(callable);
 	cloneScope(new_obj);
 	return new_obj;
 }
 
-void Object::cloneScope(const obj_ptr& new_obj) {
+void Object::cloneScope(const obj_ptr& new_obj) const {
 	for(auto &&o:Objects) {
 		new_obj->addIntoSlot(o.first, o.second->clone());
 	}

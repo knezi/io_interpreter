@@ -89,7 +89,7 @@ class PrimitiveType: public Object {
 
 		t value;
 
-		obj_ptr clone() override {
+		obj_ptr clone() const override {
 			obj_ptr new_obj=std::make_shared<PrimitiveType<t>>(value);
 			cloneScope(new_obj);
 			return new_obj;
@@ -117,7 +117,6 @@ class Operator {
 
 		obj_ptr operator()(obj_ptr scope, Arguments& args) {
 			obj_ptr val=args.execute(scope);
-			// if(((t*)scope.get())->value!=((t*)val.get())->value)
 			if(comp(((t*)scope.get())->value, ((t*)val.get())->value))
 				return new_bool(true, scope->getUpperScope());
 			return new_bool(false, scope->getUpperScope());
