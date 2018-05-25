@@ -25,12 +25,16 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 				currToken=tok.nextToken();
 			}else{
 				Arguments args;
-				if(currToken==token::symbol) {
+				if(currToken==token::symbol || currToken==token::openArguments) {
 					std::string symbol=tok.flush();
 					while(symbolPriority(symbol)>curr_scope_priority) {
-						args.addToken(currToken, symbol);
+						if(currToken==token::symbol)
+							args.addToken(currToken, symbol);
+						else
+							args.addTilClose(tok);
+
 						currToken=tok.nextToken();
-						if(currToken!=token::symbol) break;
+						if(currToken!=token::symbol && currToken!=token::openArguments) break;
 						symbol=tok.flush();
 					}
 				}
@@ -53,7 +57,9 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 				break;
 
 			case token::openArguments:
+				std::cout<<">>"<<std::endl;
 				runBlock();
+				std::cout<<"<<"<<std::endl;
 				break;
 
 			default:
@@ -66,11 +72,11 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 void Interpreter::processSymbol() {
 	std::string s=tok.flush();
 	// std::cout<<"PROCESSING "<<s<<std::endl;
-	if(s=="")
+	if(s.empty())
 		return;
 
 	if(s=="True" || s=="False") {
-		auto new_obj=builtins::new_bool(s[0]=='T');
+		auto new_obj=builtins::new_bool(s[0]=='T', curr_scope);
 		curr_scope->addIntoSlot(s, new_obj);
 		curr_scope=curr_scope->getSlot(s);
 		return;
@@ -85,8 +91,8 @@ void Interpreter::processSymbol() {
 	}
 
 	if(no) {
-		// TODO TMP
-		auto new_no=builtins::new_number(stoi(s));
+		// TODO bug TMP
+		auto new_no=builtins::new_number(stoi(s), curr_scope);
 		curr_scope->addIntoSlot(s, new_no);
 		curr_scope=curr_scope->getSlot(s);
 		return;

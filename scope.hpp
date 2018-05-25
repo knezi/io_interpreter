@@ -39,9 +39,17 @@ class Object {
 
 		const bool callable;
 		virtual obj_ptr clone();
+		void addUpperScope(obj_ptr upper) {
+			UpperScope=upper;
+		}
+
+		obj_ptr getUpperScope() {
+			return UpperScope;
+		}
 
 	private:
 		std::map<std::string, obj_ptr> Objects;
+		obj_ptr UpperScope;
 
 	protected:
 		void cloneScope(const obj_ptr& new_obj);
@@ -80,6 +88,7 @@ class Arguments {
 	public:
 		Arguments();
 		Arguments(tokenizerBase& tok);
+		void addTilClose(tokenizerBase &tok);
 
 		Arguments(Arguments && a) = default;
 		Arguments(const Arguments & a) = default;
@@ -119,13 +128,17 @@ class Arguments {
 };
 
 inline size_t symbolPriority(const std::string& sym) {
-	if(sym=="+" || sym=="-")
+	if(sym=="==")
 		return 1;
 
-	if(sym=="*" || sym=="/")
+	if(sym=="+" || sym=="-")
 		return 2;
+
+	if(sym=="*" || sym=="/")
+		return 3;
+
 	
 	// functions
-	return 3;
+	return 4;
 }
 #endif

@@ -97,10 +97,11 @@ class PrimitiveType: public Object {
 		}
 };
 
-inline obj_ptr new_bool(bool val) {
+inline obj_ptr new_bool(bool val, obj_ptr upper) {
 	auto new_no=std::make_shared<builtins::Bool>(val);
 	new_no->addIntoSlot("print",
 			std::make_shared<Function<func_ptr>>(traits<Bool>::print));
+	new_no->addUpperScope(upper);
 
 	return new_no;
 }
@@ -109,11 +110,11 @@ template<typename t>
 inline obj_ptr equality(obj_ptr scope, Arguments& args) {
 	obj_ptr val=args.execute(scope);
 	if(((t*)scope.get())->value==((t*)val.get())->value)
-		return new_bool(true);
-	return new_bool(false);
+		return new_bool(true, scope->getUpperScope());
+	return new_bool(false, scope->getUpperScope());
 }
 
-inline obj_ptr new_number(int val) {
+inline obj_ptr new_number(int val, obj_ptr upper) {
 	auto new_no=std::make_shared<builtins::Number>(val);
 	new_no->addIntoSlot("print",
 			std::make_shared<Function<func_ptr>>(traits<Number>::print));
@@ -129,6 +130,8 @@ inline obj_ptr new_number(int val) {
 
 	new_no->addIntoSlot("==",
 			std::make_shared<Function<func_ptr>>(builtins::equality<Number>));
+
+	new_no->addUpperScope(upper);
 
 	return new_no;
 }

@@ -4,8 +4,11 @@
 // OBJECT CLASS DEFINITION
 obj_ptr Object::getSlot(const std::string& ObjectName) {
 	auto slot=Objects.find(ObjectName);
-	if(slot==Objects.end())
+	if(slot==Objects.end()) {
+		if(UpperScope.get()!=nullptr)
+			return UpperScope->getSlot(ObjectName);
 		return nullptr;
+	}
 	return slot->second;
 }
 
@@ -33,6 +36,10 @@ void Object::cloneScope(const obj_ptr& new_obj) {
 Arguments::Arguments() { it=tokens.begin(); };
 
 Arguments::Arguments(tokenizerBase& tok) {
+	addTilClose(tok);
+}
+
+void Arguments::addTilClose(tokenizerBase& tok) {
 	// TODO rewrite
 	size_t closing=1;
 	token currToken=tok.nextToken();
@@ -40,7 +47,7 @@ Arguments::Arguments(tokenizerBase& tok) {
 	if(currToken==token::openArguments) ++closing;
 
 	while(closing>0) {
-		// std::cout<<"ARG "<<(int)currToken<<" "<<tok.flush()<<std::endl;
+		// std::cout<<"ARG "<<(int)currToken<<" "<<std::endl;
 		tokens.emplace_back(currToken, tok.flush());
 		currToken=tok.nextToken();
 		if(currToken==token::closeArguments) --closing;

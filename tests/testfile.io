@@ -1,12 +1,14 @@
-# (2 == 2) print # nefunguje
+b := 3
+a := (1 + 6 * b == 1*(1 + 5 + 7))
+a print
 True print
 False print
 (1 + 1 print) print
 (2 ++ + 4 ++ * 2 ++ print) print
-a := 1 ++
-a print
+e := 1 ++
+e print
 aq := method(b ++ print)
-b := 2
+w := 2
 aq
 b ++
 b print
@@ -17,7 +19,7 @@ a print
 # scope
 # scope
 # aq
-a ++
+b ++
 b print
 1 ++ print
 1 ++ print
@@ -26,7 +28,7 @@ aq2 := method(89 print
 aq2
 2 print print ++ print
 a2 := 1 print ++
-b2 := a ++
+b2 := b ++
 b2 print ++
 a2 print
 2 print
