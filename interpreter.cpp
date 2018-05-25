@@ -8,7 +8,7 @@
 Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 	tok{tok_}, endAtTerminator{terminator_}, main{main_}{
 	// TODO
-	main->addIntoSlot("method", std::make_shared<Function<obj_ptr (*) (obj_ptr, Arguments&)>>(builtins::createMethod));
+	main->addIntoSlot("method", std::make_shared<Function<func_ptr>>(builtins::createMethod));
 	curr_scope=main;
 	tok.prepare();
 

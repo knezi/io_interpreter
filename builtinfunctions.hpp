@@ -97,14 +97,7 @@ class PrimitiveType: public Object {
 		}
 };
 
-inline obj_ptr new_bool(bool val, obj_ptr upper) {
-	auto new_no=std::make_shared<builtins::Bool>(val);
-	new_no->addIntoSlot("print",
-			std::make_shared<Function<func_ptr>>(traits<Bool>::print));
-	new_no->addUpperScope(upper);
-
-	return new_no;
-}
+obj_ptr new_bool(bool val, obj_ptr upper);
 
 template<typename t>
 inline obj_ptr equality(obj_ptr scope, Arguments& args) {
@@ -112,6 +105,76 @@ inline obj_ptr equality(obj_ptr scope, Arguments& args) {
 	if(((t*)scope.get())->value==((t*)val.get())->value)
 		return new_bool(true, scope->getUpperScope());
 	return new_bool(false, scope->getUpperScope());
+}
+
+template<typename t, typename f>
+class Operator {
+	public:
+		Operator(f comp_): comp{comp_} {};
+		Operator(const Operator& o) = default;
+		Operator(Operator&& o) = default;
+		Operator& operator=(const Operator& o) = default;
+		Operator& operator=(Operator&& o) = default;
+
+		obj_ptr operator()(obj_ptr scope, Arguments& args) {
+			obj_ptr val=args.execute(scope);
+			// if(((t*)scope.get())->value!=((t*)val.get())->value)
+			if(comp(((t*)scope.get())->value, ((t*)val.get())->value))
+				return new_bool(true, scope->getUpperScope());
+			return new_bool(false, scope->getUpperScope());
+		}
+
+	private:
+		f comp;
+};
+
+template<typename t>
+using operator_t = builtins::Operator<Number, bool (*) (t, t)>;
+
+template<typename t>
+inline bool eq(t a, t b) {
+	return a==b;
+}
+
+template<typename t>
+inline bool neq(t a, t b) {
+	return a!=b;
+}
+
+template<typename t>
+inline bool gt(t a, t b) {
+	return a>b;
+}
+
+template<typename t>
+inline bool ge(t a, t b) {
+	return a>=b;
+}
+
+template<typename t>
+inline bool lt(t a, t b) {
+	return a<b;
+}
+
+template<typename t>
+inline bool le(t a, t b) {
+	return a<=b;
+}
+
+template<typename t>
+void add_operators(obj_ptr new_no) {
+	std::vector<std::pair<std::string, bool (*) (t,t)>> ops =
+				{{"==", eq<t>},
+				{"!=", neq<t>},
+				{"<", lt<t>},
+				{"<=", le<t>},
+				{">", gt<t>},
+				{">=", ge<t>}};
+
+	for(auto && op: ops) {
+		new_no->addIntoSlot(op.first,
+				std::make_shared<Function<operator_t<t>>>(operator_t<t>(op.second))); 
+	}
 }
 
 inline obj_ptr new_number(int val, obj_ptr upper) {
@@ -128,8 +191,7 @@ inline obj_ptr new_number(int val, obj_ptr upper) {
 	new_no->addIntoSlot("*",
 			std::make_shared<Function<func_ptr>>(builtins::times<Number>));
 
-	new_no->addIntoSlot("==",
-			std::make_shared<Function<func_ptr>>(builtins::equality<Number>));
+	add_operators<int>(new_no);
 
 	new_no->addUpperScope(upper);
 

@@ -128,7 +128,7 @@ class Arguments {
 };
 
 inline size_t symbolPriority(const std::string& sym) {
-	if(sym=="==")
+	if(sym=="==" || sym=="!=" || sym=="<" || sym=="<=" || sym==">" || sym==">=")
 		return 1;
 
 	if(sym=="+" || sym=="-")
