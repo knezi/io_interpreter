@@ -57,9 +57,9 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 				break;
 
 			case token::openArguments:
-				std::cout<<">>"<<std::endl;
+				// std::cout<<">>"<<std::endl;
 				runBlock();
-				std::cout<<"<<"<<std::endl;
+				// std::cout<<"<<"<<std::endl;
 				break;
 
 			default:

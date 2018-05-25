@@ -1,4 +1,6 @@
-b := 3
+m := method(ar, ar2, ar print; ar2 print)
+m(3,2)
+b := 2
 a := (1 + 6 * b == 1*(1 + 5 + 7))
 a print
 True print

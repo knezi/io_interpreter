@@ -96,6 +96,7 @@ class Arguments {
 		Arguments& operator=(const Arguments & a) = default;
 
 		obj_ptr execute(obj_ptr& scope);
+		obj_ptr execute(obj_ptr& scope, Arguments& args_values);
 
 		void addToken(token t, const std::string& s) {
 			tokens.emplace_back(t, s);
@@ -105,18 +106,17 @@ class Arguments {
 			++it;
 		}
 
-		// TODO remove
-		// token currToken() {
-			// return it->first;
-		// }
+		token currToken() {
+			return it->first;
+		}
 
-		// std::string flush() {
-			// return it->second;
-		// }
+		std::string flush() {
+			return it->second;
+		}
 
-		// bool eof() {
-			// return tokens.end()==it;
-		// }
+		bool eof() {
+			return tokens.end()==it;
+		}
 
 		void restart() {
 			it=tokens.begin();

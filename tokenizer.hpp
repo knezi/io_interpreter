@@ -190,6 +190,8 @@ using tokenlist=std::vector<std::pair<token, std::string>>;
 class tokenizerBuilder: public tokenizerBase {
 	public:
 		tokenizerBuilder(tokenlist& tokens);
+		tokenizerBuilder();
+
 		tokenizerBuilder(const tokenizerBuilder& b) = default;
 		tokenizerBuilder(tokenizerBuilder&& b) = default;
 		tokenizerBuilder& operator=(const tokenizerBuilder& b) = default;

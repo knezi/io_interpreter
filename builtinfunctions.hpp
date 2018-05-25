@@ -67,7 +67,6 @@ class Method {
 
 	private:
 		Arguments args;
-		std::vector<tokenlist> tokens;
 };
 
 inline obj_ptr createMethod(obj_ptr scope, Arguments& args) {

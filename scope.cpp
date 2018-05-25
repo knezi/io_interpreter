@@ -65,3 +65,37 @@ obj_ptr Arguments::execute(obj_ptr& scope) {
 	Interpreter interp(exec, false, scope);
 	return interp.lastScope();
 }
+
+obj_ptr Arguments::execute(obj_ptr& scope, Arguments& args_values) {
+	tokenizerBuilder exec;
+	auto it=tokens.begin();
+	while(it!=tokens.end() && it->first!=token::nextArgument) {
+		exec.addToken(it->first, it->second);
+		++it;
+	}
+
+	while(it!=tokens.end()) {
+        ++it;
+		if(it!=tokens.end()) {
+			exec.addToken(token::symbol, ":=");
+			while(!args_values.eof() && args_values.currToken()!=token::terminator
+					&& args_values.currToken()!=token::endOfBlock
+					&& args_values.currToken()!=token::nextArgument) {
+				exec.addToken(args_values.currToken(), args_values.flush());
+				args_values.move();
+			}
+			args_values.move();
+			exec.addToken(token::terminator, "");
+		}
+
+		while(it!=tokens.end() && it->first!=token::nextArgument) {
+			exec.addToken(it->first, it->second);
+			++it;
+		}
+	}
+
+	exec.restart();
+	Interpreter interp(exec, false, scope);
+	return interp.lastScope();
+}
+

@@ -347,6 +347,10 @@ tokenizerBuilder::tokenizerBuilder(tokenlist& ts) {
 	it=tokens.begin();
 }
 
+tokenizerBuilder::tokenizerBuilder() {
+	it=tokens.begin();
+}
+
 token tokenizerBuilder::nextToken() {
 	currString=it->second;
 	return (it++)->first;
