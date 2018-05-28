@@ -25,6 +25,11 @@ method(args, code)           | create a new method which can be assigned
 ----------------------------------------------------------------------------------
 while(cond, code)            | executes code until cond is False
 ----------------------------------------------------------------------------------
+for(counter, start, stop,    | Internally translated into:
+    step, code)              | counter := start;
+                             | while(counter != stop, code;
+                             |                        counter = counter + step)
+----------------------------------------------------------------------------------
 if(cond, ifTrue[, ifFalse])  | evaluates cond and run ifTrue or
                              | ifFalse respectively 
 ----------------------------------------------------------------------------------
@@ -58,4 +63,7 @@ aq2
 (1 >= 2) print
 (1 <= 2) print
 (1 < 1) print
+counter := 1
+while(counter != 5, counter print; counter = counter + 1 * 2)
+for(a, 6, 22, 4 + 2 * 2, a print)
 ```

@@ -7,10 +7,10 @@
 
 Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 	tok{tok_}, endAtTerminator{terminator_}, main{main_}, curr_slot_name{} {
-	// TODO
 	main->addIntoSlot("method", std::make_shared<Function<func_ptr>>(builtins::createMethod));
 	main->addIntoSlot("if", std::make_shared<Function<func_ptr>>(builtins::cond));
 	main->addIntoSlot("while", std::make_shared<Function<func_ptr>>(builtins::while_));
+	main->addIntoSlot("for", std::make_shared<Function<func_ptr>>(builtins::for_));
 	curr_scope=main;
 	tok.prepare();
 

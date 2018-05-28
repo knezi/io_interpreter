@@ -49,3 +49,6 @@ a2 print
 (1 >= 2) print
 (1 <= 2) print
 (1 < 1) print
+counter := 1
+while(counter != 5, counter print; counter = counter + 1 * 2)
+for(a, 6, 22, 4 + 2 * 2, a print)
