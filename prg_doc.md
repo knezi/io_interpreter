@@ -70,7 +70,7 @@ Tokens from `tokenizer` can be read through methods `nextToken()` which returns 
 
 ## scope
 
-Scope provides class `Object` which is the base class for all types (`primitiveType`, `Function`). It acts as a slot - it contains slot in which this one is containted (controlled via `addUpperSlot`, `getUpperSlot`); and contains slots (methods `getSlot()`, `AddIntoSlot(std::string name, std::shared_ptr<Object> object)`). Plus it contains the information if it is callable and method clone which returns a pointer to a new object created with deep copy.
+Scope provides class `Object` which is the base class for all types (`primitiveType`, `Function`). It acts as a slot - it contains slot in which this one is containted (controlled via `addUpperSlot`, `getUpperSlot`); and contains nested slots (methods `getSlot()`, `AddIntoSlot(std::string name, std::shared_ptr<Object> object)`). Plus it contains the information if it is callable and method clone which returns a pointer to a new object created with deep copy.
 
 Child of `Object` is `Function` which only defines `operator()` which calls function passed in the constructor.
 
@@ -83,7 +83,7 @@ On top of that, it is able to execute the loaded content in the following ways:
 
 * execute it, but use first n-1 arguments as input variables for method and set them to values passed args\_values (`execute(obj_ptr& scope, Arguments& args_values)`).
 
-* `execute_curr_part` which execute only the code until the nextArgument token (which is simply comma separating arguments in betwee round brackets).
+* `execute_curr_part` which execute only the code until the nextArgument token (which is simply comma separating arguments in between round brackets).
 
 
 ## builtinfunctions
@@ -97,7 +97,7 @@ All the following methods takes the same arguments (std::shared\_pointer<Object>
 * cond - built-in for if
 * while\_ - built-in for while
 * for\_ - built-in for for
-* createMethod - built-in for method - on a call it creates a new instance of class Method
+* createMethod - built-in for method - on a call it creates a new instance of class Method and returns it
 
 
 ## Interpreter
