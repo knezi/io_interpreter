@@ -212,6 +212,7 @@ token parseBlockEnd(processStream& in) {
 	return token::invalidCharacter;
 }
 
+// this cannot be run in constructor to avoid indefinite recursion
 void tokenizer::prepare() {
 	if(ready_) return;
 	ready_=true;

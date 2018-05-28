@@ -7,6 +7,7 @@
 
 Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 	tok{tok_}, endAtTerminator{terminator_}, main{main_}, curr_slot_name{} {
+	// thanks to the upperScope functionality this is only need in main
 	main->addIntoSlot("method", std::make_shared<Function<func_ptr>>(builtins::createMethod));
 	main->addIntoSlot("if", std::make_shared<Function<func_ptr>>(builtins::cond));
 	main->addIntoSlot("while", std::make_shared<Function<func_ptr>>(builtins::while_));
@@ -18,14 +19,16 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 	do {
 		currToken=tok.nextToken();
 		terminator=false;
+		// curr_scope is a method
 		if(curr_scope->callable) {
-
+			// arguments borderd by ()
 			if(currToken==token::openArguments) {
 				tok.flush();
 				Arguments args=Arguments(tok);
 				curr_scope=(*curr_scope)(function_scope, args);
 				currToken=tok.nextToken();
 			}else{
+				// read til you find end or lower priority
 				Arguments args;
 				if(currToken==token::symbol || currToken==token::openArguments) {
 					std::string symbol=tok.flush();
@@ -59,9 +62,7 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 				break;
 
 			case token::openArguments:
-				// std::cout<<">>"<<std::endl;
 				runBlock();
-				// std::cout<<"<<"<<std::endl;
 				break;
 
 			default:
@@ -73,7 +74,6 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 
 void Interpreter::processSymbol() {
 	std::string s=tok.flush();
-	// std::cout<<"PROCESSING "<<s<<std::endl;
 	if(s.empty())
 		return;
 

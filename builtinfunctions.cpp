@@ -10,6 +10,7 @@ obj_ptr Method::operator()(obj_ptr scope, Arguments& args_values) {
 
 obj_ptr traits<Bool>::print(obj_ptr scope, Arguments& args) {
 	std::cout<<"PRITING VALUE ";
+	// this method is ever called only on Bool objects, so we know this is safe
 	if(((Bool*)scope.get())->value)
 		std::cout<<"TRUE";
 	else
@@ -20,11 +21,14 @@ obj_ptr traits<Bool>::print(obj_ptr scope, Arguments& args) {
 
 // control flow
 obj_ptr cond(obj_ptr scope, Arguments& args) {
+	// condition
 	obj_ptr cond=args.exec_curr_part(scope);
 
+	// ifTrue
 	if(((Bool*)cond.get())->value) {
 		return args.exec_curr_part(scope);
 	}else{
+		// ifFalse
 		args.next_argument();
 		if(!args.eof()) {
 			return args.exec_curr_part(scope);
@@ -37,9 +41,12 @@ obj_ptr cond(obj_ptr scope, Arguments& args) {
 obj_ptr while_(obj_ptr scope, Arguments& args) {
 	obj_ptr cond=args.exec_curr_part(scope);
 
+	// Cond
 	while(((Bool*)cond.get())->value) {
+		// code
 		args.exec_curr_part(scope);
 		args.restart();
+		// Cond
 		cond=args.exec_curr_part(scope);
 	}
 
@@ -47,6 +54,11 @@ obj_ptr while_(obj_ptr scope, Arguments& args) {
 }
 
 obj_ptr for_(obj_ptr scope, Arguments& args) {
+// constructs code that is equal to this one and runs it
+// for(counter, start, stop,    | Internally translated into:
+//     step, code)              | counter := start;
+//                              | while(counter != stop, code;
+//                              |                        counter = counter + step)
 	tokenizerBuilder tok;
 	std::string var=args.flush();
 	args.move(); args.move();

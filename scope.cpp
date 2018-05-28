@@ -29,7 +29,6 @@ void Object::cloneScope(const obj_ptr& new_obj) const {
 	}
 }
 
-// FUNCTION CLASS DEFINITON
 
 // ARGUMENTS CLASS DEFINITION
 Arguments::Arguments() { it=tokens.begin(); };
@@ -45,7 +44,6 @@ void Arguments::addTilClose(tokenizerBase& tok) {
 	if(currToken==token::openArguments) ++closing;
 
 	while(closing>0) {
-		// std::cout<<"ARG "<<(int)currToken<<" "<<std::endl;
 		tokens.emplace_back(currToken, tok.flush());
 		currToken=tok.nextToken();
 		if(currToken==token::closeArguments) --closing;
@@ -64,6 +62,12 @@ obj_ptr Arguments::execute(obj_ptr& scope) {
 	return interp.lastScope();
 }
 
+// make a chain of
+//  arg1 := args_values1;
+//  arg2 := args_values2;
+//	...
+//  arg(n-1) := args_values(n-1);
+//	argn;
 obj_ptr Arguments::execute(obj_ptr& scope, Arguments& args_values) {
 	tokenizerBuilder exec;
 	auto it=tokens.begin();
