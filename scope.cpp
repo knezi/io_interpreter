@@ -99,3 +99,20 @@ obj_ptr Arguments::execute(obj_ptr& scope, Arguments& args_values) {
 	return interp.lastScope();
 }
 
+obj_ptr Arguments::exec_curr_part(obj_ptr& scope) {
+	tokenizerBuilder body;
+	while(it!=tokens.end() && it->first!=token::nextArgument) {
+		body.addToken(it->first, it->second);
+		++it;
+	}
+	++it;
+	body.addToken(token::terminator, "");
+	body.restart();
+	Interpreter body_exec(body, false, scope);
+	return body_exec.lastScope()->clone();
+}
+
+void Arguments::next_argument() {
+	while(it!=tokens.end() && it->first!=token::nextArgument) ++it;
+	if(it!=tokens.end()) ++it;
+}

@@ -97,6 +97,8 @@ class Arguments {
 
 		obj_ptr execute(obj_ptr& scope);
 		obj_ptr execute(obj_ptr& scope, Arguments& args_values);
+		obj_ptr exec_curr_part(obj_ptr& scope);
+		void next_argument();
 
 		void addToken(token t, const std::string& s) {
 			tokens.emplace_back(t, s);

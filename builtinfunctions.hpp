@@ -31,6 +31,8 @@ struct traits<Bool> {
 };
 
 
+obj_ptr cond(obj_ptr scope, Arguments& args);
+
 template<typename t>
 inline obj_ptr increment(obj_ptr scope, Arguments& args) {
 	// TODO pretypovani

@@ -1,3 +1,9 @@
+cond := 4
+if(2 == 2, 2 print)
+if(cond == 2 + 2, 2 print)
+if(cond == 2, 2 print)
+if(cond == 2, 2 print, False print)
+if(cond, 7 print)
 m := method(ar, ar2, ar print; ar2 print)
 m(3,2)
 b := 2

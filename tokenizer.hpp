@@ -199,7 +199,7 @@ class tokenizerBuilder: public tokenizerBase {
 
 		~tokenizerBuilder() override = default;
 
-		void prepare() override {}; // just to override base
+		void prepare() override {};
 		void reset() override {}; // in builder reset is trigged automatically
 		bool ready() override { return true;} // no need for preparation
 
