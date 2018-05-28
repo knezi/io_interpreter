@@ -6,7 +6,7 @@
 #include <memory>
 
 Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
-	tok{tok_}, endAtTerminator{terminator_}, main{main_}{
+	tok{tok_}, endAtTerminator{terminator_}, main{main_}, curr_slot_name{} {
 	// TODO
 	main->addIntoSlot("method", std::make_shared<Function<func_ptr>>(builtins::createMethod));
 	main->addIntoSlot("if", std::make_shared<Function<func_ptr>>(builtins::cond));
@@ -92,32 +92,49 @@ void Interpreter::processSymbol() {
 	}
 
 	if(no) {
-		// TODO bug TMP
+		// TODO TMP
 		auto new_no=builtins::new_number(stoi(s), curr_scope);
 		curr_scope->addIntoSlot(s, new_no);
 		curr_scope=curr_scope->getSlot(s);
 		return;
 	}
 	
-	obj_ptr next_slot=curr_scope->getSlot(s);
-
-	// the following must be := or die
-	if(next_slot==nullptr) {
-		token nextTok=tok.nextToken();
-		std::string op=tok.flush();
-
-		if(nextTok==token::symbol && op==":=") {
-			Interpreter expr(tok, true, curr_scope);
-			obj_ptr copy=(expr.lastScope())->clone();
-			curr_scope->addIntoSlot(s, copy);
-			resetScope();
-		}else{
-			throw std::logic_error("Slot "+s+" not defined.");
+	obj_ptr next_slot;
+	bool assign=false;
+	// if it's direct assignment or the slot does not exist
+	if(s=="=" || s==":=") {
+		assign=true;
+		s=curr_slot_name;
+	}else {
+		next_slot=curr_scope->getSlot(s);
+		if(next_slot==nullptr) {
+			token nextTok=tok.nextToken();
+			std::string op=tok.flush();
+			if(!(nextTok==token::symbol && op==":="))
+				throw std::logic_error("Slot "+s+" not defined.");
+			assign=true;
 		}
+	}
+
+
+	// either assing
+	if(assign) {
+		Interpreter expr(tok, true, curr_scope);
+		obj_ptr copy=(expr.lastScope())->clone();
+		main->addIntoSlot(s, copy);
+		curr_scope=copy;
+		resetScope();
 	}else{
+	// or move to next symbol
+
+		// set callable data
 		if(next_slot->callable) {
 			function_scope=curr_scope;
 			curr_scope_priority=symbolPriority(s);
+		}
+		// the next command can be simple assignment
+		if(curr_scope==main) {
+			curr_slot_name=s;
 		}
 		curr_scope=next_slot;
 	}
@@ -141,7 +158,6 @@ int main(int argc, char * * argv) {
 	std::ifstream iff { "tests/testfile.io" };
 	processStream in(iff);
 	tokenizer tok(in);
-	cout<<"####"<<endl;
 	Interpreter run(tok, false);
 
 

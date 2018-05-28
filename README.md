@@ -16,7 +16,9 @@ Numbers and Booleans - simply by typing 0,1... and True/False.
 Moreover slots:
 
 ```
-:=                           | creates a new slot assigns righthand side
+:=                           | creates a new slot assigns right-hand side
+----------------------------------------------------------------------------------
+=                            | assigns into a slot right-hand side
 ----------------------------------------------------------------------------------
 method(args, code)           | create a new method which can be assigned
                              | into a slot
@@ -29,7 +31,7 @@ print                        | Primitivetypes have defined callable slot print
 ----------------------------------------------------------------------------------
 <,>,!=,==,<=,>=              | operators returing Bool defined over primitivetypes
 ----------------------------------------------------------------------------------
-++	                         | unary operator defined on Number
+++                           | unary operator defined on Number
 ----------------------------------------------------------------------------------
 +,-,*,/                      | binary operators defined over Numbers
 ```

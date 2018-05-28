@@ -22,11 +22,11 @@ b ++
 b print
 aq
 a print
-# scope := method(a := method (1 ++ print); a) # TODO
-# scope
-# scope
-# scope
-# aq
+scope := method(a := method (1 ++ print); a)
+scope
+scope
+scope
+aq
 b ++
 b print
 1 ++ print

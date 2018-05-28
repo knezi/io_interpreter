@@ -20,6 +20,7 @@ class Interpreter {
 	private:
 		tokenizerBase& tok;
 		obj_ptr curr_scope;
+		std::string curr_slot_name;
 		size_t curr_scope_priority;
 		obj_ptr function_scope;
 		obj_ptr main;
