@@ -61,7 +61,6 @@ charGroup processStream::getCurrent() const {
 		('_' == curr_))
 		return charGroup::alphanum;
 
-	// for(char && c: ops_)  ?? TODO
 	for(char c: ops_) {
 		if(c==curr_)
 			return charGroup::op;
@@ -228,7 +227,7 @@ void tokenizer::prepare() {
 			std::make_unique<tokenBox>(in_, parseTerminator)});
 	
 	boxes_.insert({"Symbol",
-			std::make_unique<tokenBox>(in_, parseSymbol)}); // todo quote
+			std::make_unique<tokenBox>(in_, parseSymbol)});
 	boxes_.insert({"WC2",
 			std::make_unique<tokenBox>(in_, parseWC<false>)});
 	boxes_.insert({"Open",
@@ -266,7 +265,7 @@ void tokenizer::prepare() {
 	
 											{"NWC2", "Comma"},
 											{"Comma", "NWC1"},
-											{"WC2", "WC1"}}; // this has lower priority DIRTY TRICK WARNING TODO
+											{"WC2", "WC1"}}; // this has lower priority
 
 
 	for(auto && tr: transitions) {
@@ -323,7 +322,7 @@ box* argumentBox::getNextBox() {
 	return this;
 };
 
-token argumentBox::parseToken() { // TODO move code to BASE class
+token argumentBox::parseToken() {
 	if(!argument_.ready())
 		argument_.prepare();
 

@@ -17,7 +17,6 @@ using Bool=PrimitiveType<bool>;
 template<typename t>
 struct traits {
 	static obj_ptr print(obj_ptr scope, Arguments& args) {
-		//TODO
 		std::cout<<"PRINTING VALUE ";
 		std::cout<<((t*)scope.get())->value;
 		std::cout<<std::endl;
@@ -37,7 +36,6 @@ obj_ptr for_(obj_ptr scope, Arguments& args);
 
 template<typename t>
 inline obj_ptr increment(obj_ptr scope, Arguments& args) {
-	// TODO pretypovani
 	++((t*)scope.get())->value;
 	return scope;
 }

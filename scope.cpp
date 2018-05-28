@@ -14,7 +14,6 @@ obj_ptr Object::getSlot(const std::string& ObjectName) const {
 
 obj_ptr Object::operator()(obj_ptr function_scope, Arguments& args) {
 	std::cerr<<"Not callable"<<std::endl;
-	// TODO RETURN
 	return std::shared_ptr<Object>(this);
 }
 
@@ -40,7 +39,6 @@ Arguments::Arguments(tokenizerBase& tok) {
 }
 
 void Arguments::addTilClose(tokenizerBase& tok) {
-	// TODO rewrite
 	size_t closing=1;
 	token currToken=tok.nextToken();
 	if(currToken==token::closeArguments) --closing;

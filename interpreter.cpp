@@ -93,7 +93,6 @@ void Interpreter::processSymbol() {
 	}
 
 	if(no) {
-		// TODO TMP
 		auto new_no=builtins::new_number(stoi(s), curr_scope);
 		curr_scope->addIntoSlot(s, new_no);
 		curr_scope=curr_scope->getSlot(s);

@@ -9,7 +9,6 @@ obj_ptr Method::operator()(obj_ptr scope, Arguments& args_values) {
 
 
 obj_ptr traits<Bool>::print(obj_ptr scope, Arguments& args) {
-	//TODO
 	std::cout<<"PRITING VALUE ";
 	if(((Bool*)scope.get())->value)
 		std::cout<<"TRUE";

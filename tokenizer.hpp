@@ -136,7 +136,6 @@ class tokenBox: public box {
 //        |---> Symbol -> WC2 -+-> Open -- NWC1 -> Argument -> NWC2 --+-> Close --+
 //                             |         ^                            |           |
 //                     WC1 <---+         +-<---------- Comma <--------+    WC1 <--+
-// Next BOX is always unambiguously defined - not true!! TODO
 
 class tokenizerBase {
 	public:
