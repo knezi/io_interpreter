@@ -23,6 +23,8 @@ Moreover slots:
 method(args, code)           | create a new method which can be assigned
                              | into a slot
 ----------------------------------------------------------------------------------
+while(cond, code)            | executes code until cond is False
+----------------------------------------------------------------------------------
 if(cond, ifTrue[, ifFalse])  | evaluates cond and run ifTrue or
                              | ifFalse respectively 
 ----------------------------------------------------------------------------------

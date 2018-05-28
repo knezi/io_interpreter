@@ -1,3 +1,5 @@
+a := 2
+while(a < 5, a print; a = a + 1)
 cond := 4
 if(2 == 2, 2 print)
 if(cond == 2 + 2, 2 print)

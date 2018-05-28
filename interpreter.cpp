@@ -10,6 +10,7 @@ Interpreter::Interpreter(tokenizerBase& tok_, bool terminator_, obj_ptr main_):
 	// TODO
 	main->addIntoSlot("method", std::make_shared<Function<func_ptr>>(builtins::createMethod));
 	main->addIntoSlot("if", std::make_shared<Function<func_ptr>>(builtins::cond));
+	main->addIntoSlot("while", std::make_shared<Function<func_ptr>>(builtins::while_));
 	curr_scope=main;
 	tok.prepare();
 
@@ -105,6 +106,7 @@ void Interpreter::processSymbol() {
 	if(s=="=" || s==":=") {
 		assign=true;
 		s=curr_slot_name;
+		curr_scope=main;
 	}else {
 		next_slot=curr_scope->getSlot(s);
 		if(next_slot==nullptr) {
