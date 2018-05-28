@@ -155,9 +155,13 @@ void Interpreter::resetScope() {
 
 using namespace std;
 int main(int argc, char * * argv) {
-	// std::ifstream iff { "tests/testfile_correct.io" };
-	// std::ifstream iff { "/home/knezi/Dokumenty/mff/cpp/zapoctak/tests/testfile.io" };
-	std::ifstream iff { "tests/testfile.io" };
+	std::ifstream iff;
+	if(argc>1) {
+		std::vector<std::string> args{argv+1, argv+argc};
+		iff= ifstream{ args[0] };
+	}else
+	iff= ifstream{ "tests/testfile.io" };
+	
 	processStream in(iff);
 	tokenizer tok(in);
 	Interpreter run(tok, false);

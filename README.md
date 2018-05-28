@@ -5,7 +5,11 @@ Interpreter of a subset of IO language
 
 Simply run `make`, which produces `interpreter` executable.
 
-by default `test/testfile.io` is read and interpreter.
+If provided, the first argument is used as input, that is:
+
+`./interpreter prg.io` will interpret file `prg.io`.  
+
+Otherwise `test/testfile.io` is read and interpreter.
 
 # language
 
