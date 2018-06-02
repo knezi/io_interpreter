@@ -107,7 +107,9 @@ obj_ptr Arguments::exec_curr_part(obj_ptr& scope) {
 		body.addToken(it->first, it->second);
 		++it;
 	}
-	++it;
+	if(it!=tokens.end())
+		++it;
+
 	body.addToken(token::terminator, "");
 	body.restart();
 	Interpreter body_exec(body, false, scope);
